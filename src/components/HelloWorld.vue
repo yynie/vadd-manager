@@ -1,6 +1,7 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
+    <Button type="primary" shape="circle" icon="heart-broken">iview button</Button>
     <h2>Essential Links</h2>
     <ul>
       <li>
