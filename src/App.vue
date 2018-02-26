@@ -1,6 +1,5 @@
 <template>
-  <div id="app">
-    <img src="./assets/logo.png">
+  <div id="main" class="app-main">
     <router-view/>
   </div>
 </template>
@@ -11,6 +10,16 @@ export default {
 }
 </script>
 
+<!--
+引入src/style/style.scss 统一管理css
+依赖：
+cnpm install sass-loader -–save
+cnpm install node-sass --save
+-->
+<style lang="scss">
+@import "./style/style";
+</style>
+<!--
 <style>
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -21,3 +30,4 @@ export default {
   margin-top: 60px;
 }
 </style>
+-->

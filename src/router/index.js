@@ -1,15 +1,14 @@
 import Vue from 'vue'
-import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
+import VueRouter from 'vue-router'
+import {helloRouter} from './routers'
 
-Vue.use(Router)
+Vue.use(VueRouter)
 
-export default new Router({
+export const router = new VueRouter(
+  {
+//  mode: 'history', //这样就url就不会显示#
   routes: [
-    {
-      path: '/',
-      name: 'HelloWorld',
-      component: HelloWorld
-    }
+    helloRouter
   ]
-})
+  }
+);
