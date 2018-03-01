@@ -1,10 +1,12 @@
 export const homeRouter = {
     path: '/',
     name: 'Home',
-    meta: {
-        title: 'Home'
-    },
-    component: () => import('@/components/Home.vue')
+    component: () => import('@/components/Home.vue'),
+    redirect: '/query',
+    children: [
+        { path: 'query', title: 'query', name: 'query', component: () => import('@/components/query/query.vue') },
+        { path: 'dtquery', title: 'dtquery', name: 'dtquery', component: () => import('@/components/datatarget/dtquery.vue') },
+    ]
 };
 
 export const signinRouter = {
