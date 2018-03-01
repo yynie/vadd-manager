@@ -11,7 +11,7 @@
             <Form ref="loginForm" :model="form" :rules="rules">
                 <FormItem>
                     <span slot="label" :style="{fontSize:'14px'}">管理员?</span>
-                    <i-switch size="large" v-model="form.isAdmin" :disabled="isProcessing">
+                    <i-switch size="large" v-model="form.isAdmin" :disabled="isProcessing" @on-change="adminChange">
                         <span slot="open">YES</span>
                         <span slot="close">NO</span>
                     </i-switch>
@@ -24,14 +24,21 @@
                     </Input>
                 </FormItem>
                 <FormItem prop="password">
-                    <Input :type="keyType" size="large" clearable :disabled="isProcessing" v-model="form.password" :placeholder="keyTypeHint">
+                    <Input ref="pwdinput" :type="keyType" size="large" :disabled="isProcessing" v-model="form.password" :placeholder="keyTypeHint">
                         <span slot="prepend">
                             <Icon :size="20" style="width:20px" :type="keyHintIcon"></Icon>
+                        </span>
+                        
+                        <span slot="append" v-on:click="eyeClicked">
+                            <Icon :size="20" style="width:20px" :type="eyeIcon"></Icon>
                         </span>
                     </Input>
                 </FormItem>
                 <FormItem>
-                    <Button @click="handleSubmit" size="large" type="primary" long :disabled="isProcessing">登录</Button>
+                    <Button @click="handleSubmit" size="large" type="primary" long :loading="isProcessing">
+                        <span v-if="!isProcessing">登 录</span>
+                        <span v-else>正在登录...</span>
+                    </Button>
                 </FormItem>
             </Form>
             </div>
@@ -41,7 +48,8 @@
 </template>
 
 <script>
-import Cookies from '../libs/Cookies';
+import Cookies from '../libs/Cookies'
+import {LOG_IN} from '../store/mutation-types'
 export default {
   data () {
       return {       
@@ -49,6 +57,7 @@ export default {
           backgroundImage: 'url(' + require('../assets/9a28ebc78837.jpg') + ')',
         },
         isProcessing:false,
+        pwdSee:false,
         form:{
         isAdmin:false,
         password:'',
@@ -68,26 +77,45 @@ export default {
           return this.form.isAdmin?"请输入密码":"请输入API Key";
       },
       keyType(){
-          return this.form.isAdmin?"password":"text";
+          return (this.form.isAdmin && !this.pwdSee)?"password":"text";
       },
       keyHintIcon(){
           return this.form.isAdmin?"locked":"key";
+      },
+      eyeIcon(){
+          return (this.form.isAdmin && this.pwdSee)?"ios-eye":"ios-eye-outline";
       }
   },
+  mounted: function () {
+      this.$refs.pwdinput.append = false; //页面挂载后隐藏小眼睛
+  },
   methods: {
-    loginOk(user,passed){
+    eyeClicked: function(){
+        if(this.form.isAdmin){
+        this.pwdSee = !this.pwdSee;
+        console.log("eyeClicked pwdSee="+this.pwdSee);
+        }
+    },
+    adminChange: function(){
+        //隐藏或显示小眼睛
+        this.$refs.pwdinput.append = this.form.isAdmin;
+    },
+    loginOk: function(user,passed,errmsg){
         this.isProcessing = false;
         console.log("login user="+user+",passed="+passed);
         if(passed){
-            Cookies.set('user', this.form.isAdmin?"Admin":user, {expires:5,unit:'minute'});
-            this.$router.push({
-                name: 'HelloWorld'
+            var data = {user:this.form.isAdmin?"Admin":user, admin:this.form.isAdmin};
+            Cookies.set('user', JSON.stringify(data), {expires:COOKIE_EXPIRED,unit:COOKIE_EXPIRED_UNIT});
+            this.$store.commit(LOG_IN, data);
+            
+            this.$router.replace({
+                name: 'Home'
             });
         }else{
-            this.$Message.error('密码或Key错误！');   
+            this.$Message.error(errmsg||'密码或Key错误！');   
         }
       },
-    handleSubmit () {
+    handleSubmit: function() {
         this.$refs.loginForm.validate((valid) => {
             if (valid) {
                 this.isProcessing = true;
@@ -114,7 +142,7 @@ export default {
                             this.$Message.destroy();
                             this.loginOk(null,false);
                         }
-                    }, 3000);
+                    }, 2000);
                 }else{
                     // this.$http.jsonp(URL_LOGIN,{},{emulateJSON: true}).then((response) => {
                     //      console.log("responseok="+JSON.stringify(response));
@@ -141,7 +169,7 @@ export default {
                     },(response) => {
                         console.log("response="+JSON.stringify(response));
                         this.$Message.destroy();
-                        this.loginOk(false);
+                        this.loginOk(null,false,"网络错误");
                     });
                 }
             }

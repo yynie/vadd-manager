@@ -1,7 +1,10 @@
-export const helloRouter = {
+export const homeRouter = {
     path: '/',
-    name: 'HelloWorld',
-    component: () => import('@/components/HelloWorld.vue')
+    name: 'Home',
+    meta: {
+        title: 'Home'
+    },
+    component: () => import('@/components/Home.vue')
 };
 
 export const signinRouter = {
