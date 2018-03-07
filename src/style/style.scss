@@ -3,6 +3,24 @@ html,body{
     height: 100%;
 }
 
+.center-vertical{
+    position: relative;
+    top:50%;
+    transform:translateY(-50%);
+  }
+
+.padding-left-5 {
+    padding-left: 5px;
+}
+
+.margin-top-10 {
+    margin-top: 10px;
+}
+
+.margin-top-20 {
+    margin-top: 20px;
+}
+
 .app-main{
     width: 100%;
     height: 100%;
@@ -38,7 +56,7 @@ html,body{
     width: 100%;
     height: 100%;
     background: #f0f0f0;
-    min-width: 500px;
+    min-width: 600px;
 
     .layout-header-bar{
         background: #fff;
@@ -48,26 +66,36 @@ html,body{
         -webkit-box-shadow: 1px 1px 5px #405060;
         box-shadow: 10px 10px 10px .1 #405060;
       //  height: 6vh;
-
+     
+      &-div{
+          float: left;
+          height: 60px;
+      }
+      img{
+          margin: 6px 10px
+      }
       .close-menu-icon{
         transition: all .3s;
         color: rgb(46, 46, 46);
+        cursor: pointer,
       }
       .blur-close-menu-icon{
         color: #aaa
       }
       .title-area{
-        margin-top: 12px;
-        text-align: left;
+        margin-left: 30px;
+        //text-align: left;
         font-size: 12pt;
         //font-weight: bold;
         //font-family: "Microsoft YaHei";
-        color: #0078d7
+        color: #0078d7;
+        overflow: hidden;
+        span{line-height:60px};
+        padding: 0 15px
       }
       .avatar-area{
         float: right;
         position: relative;
-        top: 10px;
         right: 20px;
       }
     }
@@ -77,23 +105,27 @@ html,body{
         min-height: 92vh;
         .menu-item{
             background: #d0e0f2;
+            li{
+                overflow: hidden;
+            }
+            i{
+                transform: translateX(0px);
+                transition: font-size .2s ease, transform .2s ease;
+                vertical-align: middle;
+                font-size: 16px;
+                height: 100%;
+            }
+            span{
+                display: inline-block;
+                overflow: hidden;
+                width: 69px;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                vertical-align: bottom;
+                transition: width .2s ease .2s;
+            }
         }
-        .menu-item i{
-            transform: translateX(0px);
-            transition: font-size .2s ease, transform .2s ease;
-            vertical-align: middle;
-            font-size: 16px;
-            height: 100%;
-        }
-        .menu-item span{
-            display: inline-block;
-            overflow: hidden;
-            width: 69px;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            vertical-align: bottom;
-            transition: width .2s ease .2s;
-        }
+       
         .collapsed-menu span{
             width: 0px;
             transition: width .2s ease;
@@ -106,4 +138,6 @@ html,body{
         }
     }
 }
+
+
 

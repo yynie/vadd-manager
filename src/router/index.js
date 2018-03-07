@@ -5,7 +5,7 @@ import Util from '../libs/util'
 import Cookies from '../libs/Cookies'
 import store from '../store'
 import {LOG_IN,LOG_OUT} from '../store/mutation-types'
-import {homeRouter,signinRouter} from './routers'
+import {homeRouter,signinRouter,page404} from './routers'
 
 Vue.use(VueRouter)
 
@@ -14,7 +14,8 @@ export const router = new VueRouter(
 //  mode: 'history', //这样就url就不会显示#
   routes: [
     homeRouter,
-    signinRouter
+    signinRouter,
+    page404
   ]
   }
 );

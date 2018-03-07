@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import { LOG_IN,LOG_OUT } from './mutation-types'
+import dataTarget from './modules/data-target';
+import { LOG_IN,LOG_OUT,SET_CUR_PATH } from './mutation-types'
 Vue.use(Vuex);
 
 
@@ -8,7 +9,8 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
     state: {
         isAdmin:false,
-        user:''
+        user:'',
+        currentPath:[]
     },
     mutations: {
         [LOG_IN] (state, payload) {
@@ -21,13 +23,18 @@ const store = new Vuex.Store({
             console.log("STORE: user (" + state.user + ") logout");
             state.isAdmin = false;
             state.user = '';
+        },
+
+        [SET_CUR_PATH](state, payload) {
+            state.currentPath = payload;
+            console.log("STORE: set currentPath:" + JSON.stringify(state.currentPath));
         }
     },
     actions: {
 
     },
     modules: {
-        
+        dataTarget
     }
 });
 

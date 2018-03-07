@@ -1,11 +1,17 @@
+import ERROR404 from '@/components/error-404';
 export const homeRouter = {
     path: '/',
     name: 'Home',
     component: () => import('@/components/Home.vue'),
-    redirect: '/query',
+    redirect: '/home_index',
     children: [
-        { path: 'query', title: 'query', name: 'query', component: () => import('@/components/query/query.vue') },
-        { path: 'dtquery', title: 'dtquery', name: 'dtquery', component: () => import('@/components/datatarget/dtquery.vue') },
+        { path: 'home_index', meta:{title: '首页'}, name: 'home_index', component: () => import('@/components/homeindex.vue') },
+        
+        { path: 'query', meta:{title: 'query', group:'dquery', groupname:'数据查询'}, name: 'query', component: () => import('@/components/query/query.vue') },
+        //流量任务
+        { path: 'dtquery', meta:{title: 'dtquery', group:'dtarget', groupname:'流量消耗'}, name: 'dtquery', component: () => import('@/components/datatarget/dtquery.vue') },
+        { path: 'dttask', meta:{title: 'dttask', group:'dtquery', groupname:'流量消耗'}, name: 'dttask', component: () => import('@/components/datatarget/dttask.vue') },
+        //page404
     ]
 };
 
@@ -16,4 +22,13 @@ export const signinRouter = {
         title: '登录'
     },
     component: () => import('@/components/SignIn.vue')
+};
+
+export const page404 = {
+    path: '/*',
+    name: '404',
+    meta: {
+        title: '404-页面不存在'
+    },
+    component: ERROR404
 };

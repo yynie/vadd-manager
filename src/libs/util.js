@@ -1,3 +1,4 @@
+import {SET_CUR_PATH} from '../store/mutation-types'
 let util = {
 
 };
@@ -12,3 +13,26 @@ util.title = function (title) {
     }
     
 };
+
+util.setCurrentPath = function (vm, to) {
+    var patharr = [];
+    if(to.name === 'home_index'){
+        patharr = [
+            {name:to.name, path:to.path, title:to.title}
+        ]
+    }else{
+        if(to.group){
+            patharr = [
+                {name:'home_index', path:'/home_index', title:'首页'},
+                {name:to.group, path:'',title:to.groupname},
+                {name:to.name, path:to.path, title:to.title}
+            ]
+        }else{
+            patharr = [
+                {name:'home_index', path:'/home_index', title:'首页'},
+                {name:to.name, path:to.path, title:to.title}
+            ]
+        }
+    }
+    vm.$store.commit(SET_CUR_PATH, patharr);
+}

@@ -109,7 +109,7 @@ export default {
             this.$store.commit(LOG_IN, data);
             
             this.$router.replace({
-                name: 'Home'
+                name: 'query'
             });
         }else{
             this.$Message.error(errmsg||'密码或Key错误！');   

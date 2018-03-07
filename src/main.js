@@ -10,10 +10,18 @@ import './themes/index.less' //需要安装less-loader和less 用 --save-dev 安
 import VueResource from 'vue-resource'
 import './const'
 
+//自定义组件
+import fullScreen from './components/common/fullscreen.vue';
+import messageTip from './components/common/messagetip.vue';
+import breadcrumbNav from './components/common/breadcrumbnav.vue'
+
 Vue.config.productionTip = false
 Vue.use(iView);
 Vue.use(VueResource);
 
+Vue.component('full-screen', fullScreen);
+Vue.component('message-tip', messageTip);
+Vue.component('breadcrumb-nav', breadcrumbNav);
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
