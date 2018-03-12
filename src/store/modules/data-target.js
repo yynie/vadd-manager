@@ -7,7 +7,7 @@ const dataTarget = {
     mutations: {
         [SET_DT_CUSTOMER] (state, list) {
             state.customers = list;
-            console.log("set dataTarget.customers:"+ JSON.stringify(state.customers));
+            console.log("STORE: set dataTarget.customers:"+ JSON.stringify(state.customers));
         },
     }
 }

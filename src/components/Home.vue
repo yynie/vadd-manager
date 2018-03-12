@@ -30,8 +30,8 @@
         </div>
     </Layout>
     <Layout class="layout-main">
-        <Sider ref="sidebar" :style="{background:'#d0e0f2'}" hide-trigger collapsible :collapsed-width="0" v-model="isCollapsed">
-            <Menu active-name="1-1" :open-names="['1', '2', '3']" theme="light" width="auto" :class="menuitemClasses" @on-select="sideMenuItemSelected">
+        <Sider ref="sidebar" :style="{background:'#d0e0f2'}" hide-trigger collapsible :collapsed-width="0"><!-- @on-collapse="onCollapse"-->
+            <Menu :active-name="activeMentItem" :open-names="['1', '2', '3']" theme="light" width="auto" :class="menuitemClasses" @on-select="sideMenuItemSelected">
                 <Submenu name="1">
                     <template slot="title">
                         <Icon type="stats-bars"></Icon>
@@ -58,10 +58,11 @@
                     <MenuItem name="3-1">VCP 账户</MenuItem>
                     <MenuItem name="3-2">奖励池</MenuItem>
                     <MenuItem name="3-3">项目配置</MenuItem>
+                    <MenuItem name="3-4">流量任务客户</MenuItem>
                 </Submenu>
             </Menu>
         </Sider>
-        <Content :style="{background: '#f0f0f0', padding: '6px 4px 10px 6px'}">
+        <Content :style="{background: '#f0f0f0', padding: '6px 4px 4px 6px'}">
             <div style="height:90vh">
                 <router-view/>
             </div>
@@ -72,18 +73,21 @@
 
 <script>
 import Cookies from '../libs/Cookies'
-import {LOG_OUT} from '../store/mutation-types'
+import {LOG_OUT, SIDER_COLLAPSE} from '../store/mutation-types'
 import Util from '../libs/util'
 
 export default {
     data () {
         return {
-            isCollapsed: false,
             isFullScreen: false,
-            mesCount:1
+            mesCount:1,
+            activeMentItem:''
         }
     },
     computed: {
+        isCollapsed(){
+            return this.$store.state.isCollapsed;
+        },
         menuCloseIcon () {
             return [
                 'close-menu-icon',
@@ -107,6 +111,8 @@ export default {
         },
         collapsedSider: function (params) {
             this.$refs.sidebar.toggleCollapse();
+            this.$store.commit(SIDER_COLLAPSE,this.$refs.sidebar.isCollapsed);
+           // console.log("sider change:"+this.$refs.sidebar.isCollapsed);
         },
         sideMenuItemSelected: function(selected){
             console.log(selected);
@@ -131,7 +137,10 @@ export default {
             group: this.$route.meta.group,
             groupname: this.$route.meta.groupname
             };
-           // console.log("rout to:" + JSON.stringify(curpath));
+            
+            this.activeMentItem=curpath.name;
+            
+           // console.log("rout to:" + curpath.name);
             Util.setCurrentPath(this, curpath);
         }
     },
@@ -143,7 +152,8 @@ export default {
             group: this.$route.meta.group,
             groupname: this.$route.meta.groupname
         };
-        //console.log("mounted:" + JSON.stringify(curpath));
+        this.activeMentItem=curpath.name;
+        //console.log("mounted to:" +  curpath.name);
         Util.setCurrentPath(this, curpath);
     },
     created () {

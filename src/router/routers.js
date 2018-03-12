@@ -10,8 +10,8 @@ export const homeRouter = {
         { path: 'query', meta:{title: 'query', group:'dquery', groupname:'数据查询'}, name: 'query', component: () => import('@/components/query/query.vue') },
         //流量任务
         { path: 'dtquery', meta:{title: 'dtquery', group:'dtarget', groupname:'流量消耗'}, name: 'dtquery', component: () => import('@/components/datatarget/dtquery.vue') },
-        { path: 'dttask', meta:{title: 'dttask', group:'dtquery', groupname:'流量消耗'}, name: 'dttask', component: () => import('@/components/datatarget/dttask.vue') },
-        //page404
+        { path: 'dttask', meta:{title: '发布', group:'dtarget', groupname:'流量消耗'}, name: 'dttask', component: () => import('@/components/datatarget/dttask.vue')},
+    
     ]
 };
 

@@ -26,23 +26,23 @@ router.beforeEach((to, from, next) => {
   console.log("from:"+from.name+",to:" + to.name);
   
   var user = Cookies.get('user');
-  console.log("cookie user:"+user);
+  //console.log("cookie user:"+user);
   if (!user){
     if (store.state.user !== ''){
       store.commit(LOG_OUT);
     }
     if (to.name !== 'SignIn') {
       if (from.name === 'SignIn') {
-        console.log("sign in, stay in \"SignIn\"");
+       // console.log("sign in, stay in \"SignIn\"");
         iView.LoadingBar.finish();
         window.scrollTo(0, 0);
         next(false);
       }else{
-        console.log("not sign in, redirect to \"SignIn\"");
+       // console.log("not sign in, redirect to \"SignIn\"");
         next({name: 'SignIn'});
       }
     } else {
-      console.log("go SignIn!");
+      //console.log("go SignIn!");
       next();
     }
   } else {
@@ -52,16 +52,16 @@ router.beforeEach((to, from, next) => {
     }
     if (to.name === 'SignIn') {
       if (from.name === 'Home') {
-        console.log("sign in, stay in \"Home\"");
+        //console.log("sign in, stay in \"Home\"");
         iView.LoadingBar.finish();
         window.scrollTo(0, 0);
         next(false);
       } else {
-        console.log("sign in, redirect to \"Home\"");
+        //console.log("sign in, redirect to \"Home\"");
         next({name: 'Home'});
       }
     } else {
-      console.log("go!");
+      //console.log("go!");
       next();
     }
   }
