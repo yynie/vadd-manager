@@ -8,9 +8,9 @@ export const columns = (vm) => {
         width: 170+addwidth
     },
     {
-        key: 'create',
+        key: 'createtime',
         title: '创建日期',
-        width: 140+addwidth,
+        width: 160+addwidth,
         sortable: true
     },
     {
@@ -24,7 +24,7 @@ export const columns = (vm) => {
         width: 90+addwidth
     },
     {
-        key: 'status',
+        key: 'pub',
         title: '发布状态',
         width: 180+addwidth,
         filters: [
@@ -39,18 +39,19 @@ export const columns = (vm) => {
         ],
         filterMultiple: false,
         // filterMethod (value, row) {
+        //     vm.remoteFilter('pub', value);
         //     if (value === 1) {
-        //         return row.status === true;
+        //         return row.pub>0;
         //     } else if (value === 2) {
-        //         return row.status === false;
+        //         return row.pub === 0;
         //     }
         // },
         filterRemote(checked, key, column){
             vm.tablefilterRemote(checked, key, column);
         },
         render: (h, params) => {
-            const color = params.row.status?'':'red';
-            const text = params.row.status?'已发布':'未发布';
+            const color = params.row.pub>0?'':'red';
+            const text = params.row.pub>0?'已发布':'未发布';
         
             return h('Tag', {
                 props: {
@@ -79,6 +80,10 @@ export const columns = (vm) => {
             }
         ],
         filterMultiple: false,
+        // filterMethod (value, row) {
+        //    // vm.remoteFilter('online', value);
+        //     return (row.online === value);
+        // },
         filterRemote(checked, key, column){
             vm.tablefilterRemote(checked, key, column);
         },

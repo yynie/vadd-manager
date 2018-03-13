@@ -5,21 +5,33 @@
             <Card>
                 <Row slot="title" >
                     <div class="filter-div">
+                    <!--
                     <Icon style="color:#ff9900" type="speedometer"></Icon>
-                    <span style="color:#ff9900;marginLeft:4px;marginRight:10px">流量指标筛选:</span>
-                    <Select style="width:120px" v-model="selectedQuota" @on-change="selectedQuotaChanged">
+                    -->
+                    <span style="color:#ff9900;marginLeft:0px;marginRight:10px">流量指标筛选:</span>
+                    <Select style="width:120px" v-model="selectedQuota" @on-change="selectedQuotaChanged" :disabled="data.loading">
                         <Option v-for="item in targetlist" :value="item" :key="item">{{ item }}</Option>
                     </Select>
+                    <!--
+                    <Icon style="color:#ff5500;marginLeft:20px" type="speedometer"></Icon>
+                    -->
+                    <span style="color:#ff5500;marginLeft:20px;marginRight:10px">{{ currentDate }} 发布状态:</span>
+                    <Select style="width:120px" v-model="selectedPubState" @on-change="selectedPubStateChanged" :disabled="data.loading">
+                        <Option v-for="item in ['不限','已发布','未发布']" :value="item" :key="item">{{ item }}</Option>
+                    </Select>
+                    <Button style="marginLeft:20px;padding:6px 20px" type="primary" @click="filterImeis">
+                        <Icon type='search' size='16'></Icon>
+                    </Button>
                     </div>
                     
                     <div class="filter-div-right">
-                        <Button type="ghost" @click="onlineCheckAll">检测上线</Button>
+                        <Button type="ghost" @click="onlineCheckAll"  :disabled="data.loading">检测上线</Button>
                     </div>
                 </Row>
                 <Table :loading="data.loading" border stripe :columns="columns" :data="tableData" height='630'></Table>
                 <div style="overflow: hidden; marginTop: 10px">
                     <div style="float: right;height:40px">
-                        <Page v-show="!data.loading" show-total size="small" :page-size="data.pagesize" :total="data.filtertotal" :current="data.page" @on-change="changePage" :style="{lineHeight:'40px'}"></Page> 
+                        <Page v-show="!data.loading" show-total size="small" :page-size="data.pagesize" :total="data.total" :current="data.page" @on-change="changePage" :style="{lineHeight:'40px'}"></Page> 
                     </div>
                 </div>
             </Card>
@@ -31,13 +43,13 @@
                 </span>
                 <p class="margin-top-20">
                     客户&nbsp;&nbsp;
-                    <Select filterable size="small" style="width:180px" v-model="selectedUserID" :loading="loadingCustomer" @on-change="userChanged">
+                    <Select filterable size="small" style="width:180px" v-model="selectedUserID" :loading="loadingCustomer" @on-change="userChanged" :disabled="data.loading">
                         <Option v-for="item in customers" :value="item.index" :key="item.index">
                             <span>{{item.name}}</span>
                             <span style="float:right;color:#ccc">{{item.disp}}</span>
                         </Option>
                     </Select>
-                    <Button :loading="loadingCustomer" size="small" @click="handleloadCustomer" type="text"><u>刷新</u></Button>
+                    <Button :loading="loadingCustomer" size="small" @click="handleloadCustomer" type="text" :disabled="data.loading"><u>刷新</u></Button>
                     <p v-show="errorMsg1 !== ''" style="color:#f00;font-size:12px">*{{errorMsg1}}*</p>
                 </p>
                 <p class="margin-top-20">
@@ -56,8 +68,8 @@
                     </transition>
                 </p>
                 <div class="add-button-con margin-top-20">
-                    <Button class="add-button" type="primary" :loading="data.loading" @click="handleLoad">载入已入库imei</Button>
-                    <Button class="add-button" @click="handleImportImei">导入新imei</Button>
+                    <Button class="add-button" type="primary" :loading="data.loading" @click="handleLoadAll">载入已入库imei</Button>
+                    <Button class="add-button" @click="handleImportImei" :disabled="data.loading">导入新imei</Button>
                     
                     <Modal ref="modal1" v-model="importImei" :mask-closable="false" :closable="false" width="1200">
                         <addimei-modal ref="addimei" v-show="curStep===0" :customerid="selectedUserID" :modal="this.$refs.modal1"
@@ -79,7 +91,7 @@
                 </span>
                 <p class="margin-top-20">
                     <Icon type="play"></Icon>&nbsp;范围&nbsp;&nbsp;&nbsp;&nbsp;
-                    <Select size="small" style="width:180px" v-model="selectedPubRange">
+                    <Select size="small" style="width:180px" v-model="selectedPubRange"  :disabled="data.loading">
                         <Option v-for="item in pubRangetlist" :value="item.name" :key="item.name">
                             <span>{{item.name}}</span>
                             <span style="float:right;color:#ccc">{{item.disp}}</span>
@@ -90,7 +102,7 @@
                      待发布数量：<b style="color:#ed3f14">{{ pubcalc }}</b>
                  </p>
                  <div class="publish-button-con margin-top-20">
-                 <Button class="publish-button" type="primary">发布</Button>
+                 <Button class="publish-button" type="primary"  :disabled="data.loading">发布</Button>
                  </div>
             </Card>
             <Card class="margin-top-10">
@@ -98,13 +110,13 @@
                     <Icon type="information-circled" size='18'></Icon>&nbsp;&nbsp;&nbsp;&nbsp;{{currentDate}} 任务数量:
                 </span>
                     <p >
-                        总数：<b>{{ data.total }}</b>
+                        总数：<b>{{ info.total>=0?info.total:((info.total=== -2)?"获取中":"未知") }}</b>
                     </p>
                     <p class="margin-top-10">
-                        已发布：<b style="color:#19be6b">{{ data.pubed }}</b>
+                        已发布：<b style="color:#19be6b">{{ info.pubed>=0?info.pubed:((info.pubed=== -2)?"获取中":"未知") }}</b>
                     </p>
                     <p class="margin-top-10">
-                        待发布：<b style="color:#ed3f14">{{ data.tobepub }}</b>
+                        待发布：<b style="color:#ed3f14">{{ info.tobepub>=0?info.tobepub:((info.tobepub=== -2)?"获取中":"未知") }}</b>
                     </p>
             </Card>
             </Col>
@@ -115,11 +127,11 @@
 <script>
 import {SET_DT_CUSTOMER} from '../../store/mutation-types'
 import * as table from './table/publish';
-import {datapub} from './table/testdata';
 import addimeiModal from './addImeiModal.vue';
 import workFlow from '../common/workFlow.vue';
 import checkimeiModal from './checkImeiModal.vue'
 import commitimeiModal from './commitImeiModal.vue'
+import moment from 'moment';
 export default {
     components: {
         //'addimei-modal':AddImeiModal
@@ -137,24 +149,28 @@ export default {
             loadingCustomer:true,
             selectedUserID:'',
             selectedQuota:'',
+            selectedPubState:'',
             targetlist:[],
             data:{
                 loading:false,
                 origin:[],
-                filterData:[],
-                shown:[],
-                pagesize: 5,
-                filtertotal:0,
-                filterTobePub:0,
+                filterdata:[],
+                pagesize: 15,
                 page:1,
                 total:0,
-                pubed:0,
                 tobepub:0,
-                filterAndSort:{status:0,online:0,quota:0}
+                filteredtobepub:0,
+                query:{status:0,quota:0},
+                filter:{pub:'',online:''},
+            },
+            info:{
+                total:-1,
+                pubed:-1,
+                tobepub:-1
             },
             errorMsg1:'',
             selectedPubRange:'全部',
-            pubRangetlist:[{name:'全部',disp:''},{name:'筛选全部',disp:''},{name:'当前页',disp:''}],
+            pubRangetlist:[{name:'全部',disp:''},{name:'当前筛选项',disp:''},{name:'当前页',disp:''}],
             addimeiSteps:[{title:'新增',describe:'导入或手动输入'},{title:'检测',describe:'检测冲突'},{title:'提交',describe:'提交至数据库'}],
             curStep:0,
             curStepStatus:'process'
@@ -173,8 +189,10 @@ export default {
         },
         currentDate(){
             if(this.taskTime === ''){
-                var d = new Date;
-                this.taskTime = d.getFullYear()+ "-" + ((d.getMonth() + 1)>9?(d.getMonth() + 1):"0"+(d.getMonth() + 1));
+                this.taskTime = moment().format("YYYY-MM");
+           //     console.log("currentDate:"+this.taskTime);
+           //     var d = new Date;
+           //     this.taskTime = d.getFullYear()+ "-" + ((d.getMonth() + 1)>9?(d.getMonth() + 1):"0"+(d.getMonth() + 1));
             }
             return this.taskTime;
         },
@@ -182,21 +200,15 @@ export default {
             return this.$store.state.dataTarget.customers;
         },
         tableData(){        
-            return this.data.shown;
+            return this.data.filterdata;
         },
         pubcalc(){
             if(this.selectedPubRange === '全部'){
-                return this.data.tobepub;
-            }else if(this.selectedPubRange === '筛选全部'){
-                return this.data.filterTobePub;
+                return this.info.tobepub>=0?this.info.tobepub:((this.info.tobepub=== -2)?"获取中":"未知");
+            }else if(this.selectedPubRange === '当前筛选项'){
+                return this.data.filteredtobepub;
             }else{
-                var count = 0;
-                this.data.shown.forEach(item => {
-                    if(item.status === false){
-                        count++;
-                    }
-                });
-                return count;
+                return this.data.tobepub;
             }
         }
     },
@@ -211,6 +223,16 @@ export default {
         handleChangeTaskTime: function() {
             this.taskTime = this.setTaskTime;
             this.dateEditing = false;
+            this.clearTable(true);
+            if(this.selectedUserID === ''){
+                this.info.total = -1;
+                this.info.pubed = -1;
+                this.info.tobepub = -1;
+                return;
+            }
+            
+            var id = parseInt(this.selectedUserID);
+            var user = this.$store.state.dataTarget.customers[id];
         },
         cancelEditTaskTime: function() {
             this.publishTimeType = 'immediately';
@@ -219,7 +241,28 @@ export default {
         changePage: function(curpage){
             this.data.page = curpage;
             console.log("page change to " + this.data.page);
-            this.generateShownData();
+            if(this.selectedUserID === ''){
+                console.error("page change no user");
+                return;
+            }else if(this.data.loading === true){
+                console.error("page change in loading");
+                return;
+            }
+            this.data.loading = true;
+            var id = parseInt(this.selectedUserID);
+            var user = this.$store.state.dataTarget.customers[id];
+           
+            var params = {
+                custkey:user.apikey,
+                page:this.data.page,
+                pagesize:this.data.pagesize,
+                taskTime:this.taskTime,
+                pubstate:this.data.query.status,
+                quota:this.data.query.quota
+            }
+            
+            this.checkStatistics(user.apikey);
+            this.getImeis(params);
         },
         handleImportImei: function(){
             if(this.selectedUserID === ''){
@@ -228,103 +271,227 @@ export default {
                 this.importImei=true;
             }
         },
-        handleLoad: function(){
-            if(this.selectedUserID === ''){
-                this.$Message.error("请选择客户");
-            }else{
-                this.data.origin = datapub.list;
-                this.data.total = datapub.total;
-                this.data.pubed = datapub.pubed;
-                this.data.tobepub = datapub.tobepub;
-                this.generateFilterData();
-                this.generateShownData();
-                this.data.loading = false;
-            }
-        },
-        generateFilterData:function(){
-            this.data.filterData = [];
-            this.data.filterTobePub = 0;
-            // if(this.data.origin.length === 0){
-            //     return
-            // }
-            var status = this.data.filterAndSort.status;
-            var online = this.data.filterAndSort.online;
-            var quota = this.data.filterAndSort.quota;
-            
-            this.data.origin.forEach(item => {
-                var add = true;
-                if((status === 1) && (item.status === false)){
-                    add = false;
-                }else if((status === 2) && (item.status === true)){
-                    add = false;
+        checkStatistics:function(custkey){
+            console.log("checkStatistics:custkey="+custkey+",taskTime="+this.taskTime);
+            this.info.total = -2;
+            this.info.pubed = -2;
+            this.info.tobepub = -2;
+            this.$http.get(URL_DATATARGET_IMEIS_STATISTICS,{params:{custkey:custkey,tasktime:this.taskTime}}).then((response) => {
+                if(response.status === 200){
+               
+                   this.info.total = response.body[0].total;
+                   if(this.info.total === 0){
+                        this.info.pubed = 0;
+                        this.info.tobepub = 0;
+                   }else{
+                        this.info.pubed = response.body[0].pubed;
+                        this.info.tobepub = response.body[0].tobepub;
+                   }
+                    console.log("checkStatistics:"+JSON.stringify(this.info));
+                }else{
+                    console.log("responseok="+JSON.stringify(response));
+                    this.info.total = -1;
+                    this.info.pubed = -1;
+                    this.info.tobepub = -1;
                 }
-
-                if((online === 1) && (item.online !== 1)){
-                    add = false;
-                }else if((online === 2) && (item.online !== 2)){
-                    add = false;
-                }else if((online === 3) && (item.online !== 3)){
-                    add = false;
-                }
-
-                if(quota > 0 && quota != item.quota){
-                    add = false;
-                }
-
-                if(add){
-                    this.data.filterData.push(item);
-                    if(item.status === false){
-                        this.data.filterTobePub++;
-                    }
-                }
-                this.data.filtertotal = this.data.filterData.length;
+            },(response) => {
+                console.log("err:response="+JSON.stringify(response));
+                this.info.total = -1;
+                this.info.pubed = -1;
+                this.info.tobepub = -1;
             });
         },
-        generateShownData:function(){
-            this.data.shown = [];
-            var start = this.data.pagesize * (this.data.page - 1);
-            var size = Math.min(this.data.filterData.length - start,this.data.pagesize);
+        filterImeis: function(){
+            if(this.selectedUserID === ''){
+                this.$Message.error("请选择客户");
+            }else if(this.data.loading === true){
+                this.$Message.error("正在加载 请稍后");
+            }else{
+                this.data.loading = true;
+                var id = parseInt(this.selectedUserID);
+                var user = this.$store.state.dataTarget.customers[id];
+                this.data.page = 1;
 
-            for(var i=0; i<size; i++){
-                this.data.shown.push(this.data.filterData[start+i]);
+                var params = {
+                    custkey:user.apikey,
+                    page:this.data.page,
+                    pagesize:this.data.pagesize,
+                    taskTime:this.taskTime,
+                    pubstate:this.data.query.status,
+                    quota:this.data.query.quota
+                }
+                console.log("load:"+JSON.stringify(params));
+                this.checkStatistics(user.apikey);
+                this.getImeis(params);
             }
+        },
+        handleLoadAll: function(){
+            if(this.selectedUserID === ''){
+                this.$Message.error("请选择客户");
+            }else if(this.data.loading === true){
+                this.$Message.error("正在加载 请稍后");
+            }else{
+                this.selectedQuota="不限";
+                this.selectedPubState="不限";
+                this.data.loading = true;
+                var id = parseInt(this.selectedUserID);
+                var user = this.$store.state.dataTarget.customers[id];
+                this.data.page = 1;
+
+                var params = {
+                    custkey:user.apikey,
+                    page:this.data.page,
+                    pagesize:this.data.pagesize,
+                    taskTime:this.taskTime,
+                    pubstate:0,
+                    quota:0
+                }
+                console.log("load:"+JSON.stringify(params));
+                this.checkStatistics(user.apikey);
+                this.getImeis(params);
+            }
+        },
+        getImeis:function(query){
+            this.data.loading = true;
+            this.$http.get(URL_DATATARGET_IMEIS,{params:query}).then((response) => {
+                if(response.status === 200){
+                   var res = response.body;
+                   if(res.total === 0){
+                       console.log("getImeis="+JSON.stringify(res));
+                       this.clearTable(false);
+                   }else{
+                        this.parseData(res.data);
+                  
+                        this.data.page = res.page;
+                        this.data.total = res.total;
+                   }
+                   this.data.loading = false;
+                }else{
+                    console.log("responseok="+JSON.stringify(response));
+                    this.clearTable(false);
+                    this.$Message.error("网络错误!");
+                    this.data.loading = false;
+                }
+            },(response) => {
+                this.clearTable(false);
+                console.log("err:response="+JSON.stringify(response));
+                this.$Message.error("网络错误!");
+                this.data.loading = false;
+            });
+        },
+        clearTable:function(clearInfo){
+            this.data.origin=[];
+            this.data.total=0;
+            this.data.tobepub = 0;
+            if(clearInfo === true){
+                this.info.total = -1;
+                this.info.pubed = -1;
+                this.info.tobepub = -1;
+            } 
+        },
+        parseData:function(data){
+            this.data.origin=[];
+            this.data.tobepub=0;
+            data.forEach(item => {
+                if(item.pub > 0){
+                    
+                }else{
+                    this.data.tobepub ++;
+                }
+                var ct = moment(item.createtime);
+                item.createtime = ct.format('YYYY-MM-DD HH:mm:ss');
+                item['duration']=item.start+" ~ "+item.end;
+                item['online']=3;
+                this.data.origin.push(item);
+            })
+            this.filterTableData();
+        },
+        filterTableData:function(){
+            this.data.filterdata = [];
+            this.data.filteredtobepub = 0;
             
+            if(this.data.origin.length == 0){
+                return;
+            }
+            this.data.origin.forEach(item => {
+                var add = true;
+                if(this.data.filter.pub === 'pubed'){
+                    add = (item.pub > 0);
+                }else if(this.data.filter.pub === 'tobe'){
+                    add = !(item.pub > 0);
+                }
+                if(this.data.filter.online === 'online'){
+                    add = (item.online === 1);
+                }else if(this.data.filter.online === 'offline'){
+                     add = (item.online === 2);
+                }else if(this.data.filter.online === 'unknown'){
+                     add = (item.online === 3);
+                }
+                if(add === true){
+                     if(item.pub > 0){
+                    
+                    }else{
+                    this.data.filteredtobepub ++;
+                    }
+                    this.data.filterdata.push(item);
+                }
+            })
+        },
+        tablefilterRemote:function(checked, key, column){
+          //  console.log("remoteFilter key:"+key+",checked="+checked);
+            if(key === 'pub'){
+                if(checked.length > 0){
+                    if(checked[0] === 1)
+                        this.data.filter.pub = 'pubed';
+                    else if(checked[0] === 2)
+                        this.data.filter.pub = 'tobe';
+                }else{
+                    this.data.filter.pub = '';
+                }
+            }else if(key === 'online'){
+                 if(checked.length > 0){
+                    if(checked[0] === 1)
+                        this.data.filter.online = 'online';
+                    else if(checked[0] === 2)
+                        this.data.filter.online = 'offline';
+                    else if(checked[0] === 3)
+                        this.data.filter.online = 'unknown';
+                 }else{
+                     this.data.filter.online = '';
+                 }      
+            }
+            console.log("remoteFilter filter:"+JSON.stringify(this.data.filter));
+            this.filterTableData();
         },
         selectedQuotaChanged:function(value){
             console.log("selectedQuotaChanged:"+value);
             if(this.selectedQuota === "不限"){
-                this.data.filterAndSort.quota=0;
+                this.data.query.quota=0;
             }else{
-                this.data.filterAndSort.quota = parseInt(this.selectedQuota);
+                this.data.query.quota = parseInt(this.selectedQuota);
             }
-            console.log("selectedQuotaChanged:quota="+this.data.filterAndSort.quota);
-            this.data.page = 1;
-            this.generateFilterData();
-            this.generateShownData();
+            console.log("selectedQuotaChanged:quota="+this.data.query.quota);
         },
-        tablefilterRemote: function(checked, key, column){
-            console.log("tablefilterRemote:key="+key+",checked="+checked[0]);
-            var value = 0;
-            if(checked.length > 0){
-                value = checked[0];
+        selectedPubStateChanged:function(value){
+            if(this.selectedPubState === "已发布"){
+                this.data.query.status=1;
+            }else if(this.selectedPubState === "未发布"){
+                this.data.query.status=2;
+            }else{
+                this.data.query.status=0;
             }
-            
-            if(key === 'status'){//发布状态
-                this.data.filterAndSort.status = value;
-            }else if(key === 'online'){
-                this.data.filterAndSort.online = value;
-            }
-            this.data.page = 1;
-            this.generateFilterData();
-            this.generateShownData();
         },
         userChanged:function(value){
             console.log("userChanged:value="+value+ ",selectedUserID="+this.selectedUserID);
+            this.clearTable(true);
+
             if(this.selectedUserID === ''){
                 this.targetlist = [];
                 this.selectedQuota='';
+                this.selectedPubState='';
                 return;
             }
+            
             this.targetlist = [
                 "不限"
             ];
@@ -337,6 +504,7 @@ export default {
             //     }
             // });
             this.selectedQuota="不限";
+            this.selectedPubState="不限";
             this.$refs.addimei.clear();
         },
         stepCanceled: function(){

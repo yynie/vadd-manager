@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "iview": "^2.9.2",
+    "moment": "^2.21.0",
     "node-sass": "^4.7.2",
     "sass-loader": "^6.0.6",
     "tiny-cookie": "^2.1.1",

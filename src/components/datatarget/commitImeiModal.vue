@@ -51,7 +51,7 @@ export default {
             error:false,
             showResult:false,
             offset:0,
-            COMMITLENPER:100
+            COMMITLENPER:500
         }
     },
     computed:{
@@ -112,7 +112,7 @@ export default {
                 data.imeiarr.push(this.mydata.imeiarr[i]);
             }
             if(data.imeiarr.length > 0){
-                this.$http.post(URL_DATATARGET_ADD_IMEIS,data).then((response) => {
+                this.$http.post(URL_DATATARGET_IMEIS,data).then((response) => {
                         console.log("responseok="+JSON.stringify(response));
                         if(response.status === 200){
                             this.next(data.imeiarr.length);
