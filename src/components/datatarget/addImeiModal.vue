@@ -76,7 +76,7 @@ export default {
             endMonth:'',
             imeierror:'',
             commitingData:false,
-            MAXLEN:2000
+            MAXLEN:5000
         }
     },
     computed:{

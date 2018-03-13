@@ -2,11 +2,13 @@
 * 需要安装 cnpm install mysql -g， 可选安装 cnpm install @types/mysql -g
 * 使用express做框架  cnpm install express -g
 * 要上传json数据  cnpm install body-parser -g
+* moment 处理时间容易一点   cnpm install moment -g
 */
 var express = require('express');
 var bodyParser = require('body-parser');
 var app = express();
 var mysql  =require("mysql"); 
+var moment = require('moment');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -38,7 +40,8 @@ var poolmnger = mysql.createPool({
 
 app.get(base+'login', function (req, res) {
     console.log("get login");
-    res.jsonp({test:"2222"});
+    var create = moment().format('YYYY-MM-DD h:mm:ss'); 
+    res.jsonp({test:create});
 })
 
 app.post(base+'login', function (req, res) {
@@ -140,9 +143,10 @@ app.post(base+'datatarget/imeis', function (req, res) {
     var custkey = data.custkey;
     var array = data.imeiarr;
     var len = array.length;
-     
-    var sql1 = 'INSERT INTO t_imei_pub(`imei`, `custkey`, `start`, `end`, `quota`) VALUES(';
-    var sql2 = '\''+custkey+'\',\''+start+'\',\''+end+'\',\''+quota+'\')';
+    
+    var create = moment().format('YYYY-MM-DD h:mm:ss'); 
+    var sql1 = 'INSERT INTO t_imei_pub(`imei`, `custkey`, `start`, `end`, `quota`, `createtime`) VALUES(';
+    var sql2 = '\''+custkey+'\',\''+start+'\',\''+end+'\',\''+quota+'\',\''+create+'\')';
      poolmnger.getConnection(function(err,conn){
          if(err){
              res.status(500).json({error:err});
@@ -161,7 +165,7 @@ app.post(base+'datatarget/imeis', function (req, res) {
     
     var index = i;
     var sql=sqlpart1 + '\'' + array[index]+'\','+sqlpart2;
-    console.log("inputImei:"+sql);
+   // console.log("inputImei:"+sql);
     conn.query(sql,function(err,results,fields){ 
         if(err){
             conn.release();
