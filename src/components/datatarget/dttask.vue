@@ -50,7 +50,9 @@
                         </Option>
                     </Select>
                     <Button :loading="loadingCustomer" size="small" @click="handleloadCustomer" type="text" :disabled="data.loading"><u>刷新</u></Button>
-                    <p v-show="errorMsg1 !== ''" style="color:#f00;font-size:12px">*{{errorMsg1}}*</p>
+                    <!--<p v-show="errorMsg1 !== ''" style="color:#f00;font-size:12px">*{{errorMsg1}}*</p>-->
+                    <Alert v-show="errorMsg1 !== ''" type="error" style="marginTop:4px" show-icon>{{errorMsg1}}</Alert>
+                    <p v-show="selectedUserID !== ''" style="font-size:12px;marginTop:4px">KEY：{{custkey}}</p>
                 </p>
                 <p class="margin-top-20">
                     <Icon type="android-time"></Icon>&nbsp;任务日期&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="color:#19be6b">{{ currentDate }}</b>
@@ -71,7 +73,7 @@
                     <Button class="add-button" type="primary" :loading="data.loading" @click="handleLoadAll">载入已入库imei</Button>
                     <Button class="add-button" @click="handleImportImei" :disabled="data.loading">导入新imei</Button>
                     
-                    <Modal ref="modal1" v-model="importImei" :mask-closable="false" :closable="false" width="1200">
+                    <Modal ref="modal1" v-model="importImeiModal" :mask-closable="false" :closable="false" width="1200">
                         <addimei-modal ref="addimei" v-show="curStep===0" :customerid="selectedUserID" :modal="this.$refs.modal1"
                              @on-commit="addImeiCommit" @on-cancel="stepCanceled"></addimei-modal>
                         <checkimei-modal ref="checkimei" v-show="curStep===1" :modal="this.$refs.modal1" 
@@ -102,7 +104,10 @@
                      待发布数量：<b style="color:#ed3f14">{{ pubcalc }}</b>
                  </p>
                  <div class="publish-button-con margin-top-20">
-                 <Button class="publish-button" type="primary"  :disabled="data.loading">发布</Button>
+                 <Button class="publish-button" type="primary"  :disabled="data.loading" @click="pubBatched">发布</Button>
+                 <Modal ref="modal3" v-model="pubbatchedModal" :mask-closable="false" :closable="false" :footerHide="true" width="800">
+                    <pub-batch ref="pubbatched" :modal="this.$refs.modal3" @on-result="pubBatchResult"></pub-batch>
+                </Modal>
                  </div>
             </Card>
             <Card class="margin-top-10">
@@ -121,7 +126,6 @@
             </Card>
             </Col>
         </Row>
-   
     </div>
 </template>
 <script>
@@ -131,6 +135,7 @@ import addimeiModal from './addImeiModal.vue';
 import workFlow from '../common/workFlow.vue';
 import checkimeiModal from './checkImeiModal.vue'
 import commitimeiModal from './commitImeiModal.vue'
+import pubBatch  from './pubBatchModal.vue'
 import moment from 'moment';
 export default {
     components: {
@@ -138,6 +143,7 @@ export default {
         addimeiModal,
         checkimeiModal,
         commitimeiModal,
+        pubBatch,
         workFlow
     },
     data () {
@@ -145,9 +151,11 @@ export default {
             dateEditing:false,
             setTaskTime:'',
             taskTime:'',
-            importImei:false,
+            importImeiModal:false,
+            pubbatchedModal:false,
             loadingCustomer:true,
             selectedUserID:'',
+            custkey:'',
             selectedQuota:'',
             selectedPubState:'',
             targetlist:[],
@@ -190,9 +198,6 @@ export default {
         currentDate(){
             if(this.taskTime === ''){
                 this.taskTime = moment().format("YYYY-MM");
-           //     console.log("currentDate:"+this.taskTime);
-           //     var d = new Date;
-           //     this.taskTime = d.getFullYear()+ "-" + ((d.getMonth() + 1)>9?(d.getMonth() + 1):"0"+(d.getMonth() + 1));
             }
             return this.taskTime;
         },
@@ -224,15 +229,6 @@ export default {
             this.taskTime = this.setTaskTime;
             this.dateEditing = false;
             this.clearTable(true);
-            if(this.selectedUserID === ''){
-                this.info.total = -1;
-                this.info.pubed = -1;
-                this.info.tobepub = -1;
-                return;
-            }
-            
-            var id = parseInt(this.selectedUserID);
-            var user = this.$store.state.dataTarget.customers[id];
         },
         cancelEditTaskTime: function() {
             this.publishTimeType = 'immediately';
@@ -249,26 +245,23 @@ export default {
                 return;
             }
             this.data.loading = true;
-            var id = parseInt(this.selectedUserID);
-            var user = this.$store.state.dataTarget.customers[id];
-           
             var params = {
-                custkey:user.apikey,
+                custkey:this.custkey,
                 page:this.data.page,
                 pagesize:this.data.pagesize,
-                taskTime:this.taskTime,
+                tasktime:this.taskTime,
                 pubstate:this.data.query.status,
                 quota:this.data.query.quota
             }
             
-            this.checkStatistics(user.apikey);
+            this.checkStatistics(this.custkey);
             this.getImeis(params);
         },
         handleImportImei: function(){
             if(this.selectedUserID === ''){
                 this.$Message.error("请选择客户");
             }else{
-                this.importImei=true;
+                this.importImeiModal=true;
             }
         },
         checkStatistics:function(custkey){
@@ -301,27 +294,29 @@ export default {
                 this.info.tobepub = -1;
             });
         },
-        filterImeis: function(){
+        filterImeis: function(keeppage){
             if(this.selectedUserID === ''){
                 this.$Message.error("请选择客户");
             }else if(this.data.loading === true){
                 this.$Message.error("正在加载 请稍后");
             }else{
                 this.data.loading = true;
-                var id = parseInt(this.selectedUserID);
-                var user = this.$store.state.dataTarget.customers[id];
-                this.data.page = 1;
+                if(keeppage === true){
+                    console.log("filterImeis Do NOT change page");
+                }else{
+                    this.data.page = 1;
+                }
 
                 var params = {
-                    custkey:user.apikey,
+                    custkey:this.custkey,
                     page:this.data.page,
                     pagesize:this.data.pagesize,
-                    taskTime:this.taskTime,
+                    tasktime:this.taskTime,
                     pubstate:this.data.query.status,
                     quota:this.data.query.quota
                 }
                 console.log("load:"+JSON.stringify(params));
-                this.checkStatistics(user.apikey);
+                this.checkStatistics(this.custkey);
                 this.getImeis(params);
             }
         },
@@ -334,20 +329,18 @@ export default {
                 this.selectedQuota="不限";
                 this.selectedPubState="不限";
                 this.data.loading = true;
-                var id = parseInt(this.selectedUserID);
-                var user = this.$store.state.dataTarget.customers[id];
                 this.data.page = 1;
 
                 var params = {
-                    custkey:user.apikey,
+                    custkey:this.custkey,
                     page:this.data.page,
                     pagesize:this.data.pagesize,
-                    taskTime:this.taskTime,
+                    tasktime:this.taskTime,
                     pubstate:0,
                     quota:0
                 }
                 console.log("load:"+JSON.stringify(params));
-                this.checkStatistics(user.apikey);
+                this.checkStatistics(this.custkey);
                 this.getImeis(params);
             }
         },
@@ -383,6 +376,8 @@ export default {
             this.data.origin=[];
             this.data.total=0;
             this.data.tobepub = 0;
+            this.data.filterdata=[];
+            this.data.filteredtobepub=0;
             if(clearInfo === true){
                 this.info.total = -1;
                 this.info.pubed = -1;
@@ -392,6 +387,7 @@ export default {
         parseData:function(data){
             this.data.origin=[];
             this.data.tobepub=0;
+            var index = 0;
             data.forEach(item => {
                 if(item.pub > 0){
                     
@@ -401,8 +397,9 @@ export default {
                 var ct = moment(item.createtime);
                 item.createtime = ct.format('YYYY-MM-DD HH:mm:ss');
                 item['duration']=item.start+" ~ "+item.end;
-                item['online']=3;
+                item['id'] = index;
                 this.data.origin.push(item);
+                index ++;
             })
             this.filterTableData();
         },
@@ -421,11 +418,11 @@ export default {
                     add = !(item.pub > 0);
                 }
                 if(this.data.filter.online === 'online'){
-                    add = (item.online === 1);
+                    add = (item.online === 1) && add;
                 }else if(this.data.filter.online === 'offline'){
-                     add = (item.online === 2);
+                     add = (item.online === 2) && add;
                 }else if(this.data.filter.online === 'unknown'){
-                     add = (item.online === 3);
+                     add = (item.online === 0) && add;
                 }
                 if(add === true){
                      if(item.pub > 0){
@@ -489,6 +486,7 @@ export default {
                 this.targetlist = [];
                 this.selectedQuota='';
                 this.selectedPubState='';
+                this.custkey='';
                 return;
             }
             
@@ -497,17 +495,14 @@ export default {
             ];
             var id = parseInt(this.selectedUserID);
             var user = this.$store.state.dataTarget.customers[id];
+            this.custkey = user.apikey;
             this.targetlist.push(...user.quotas);
-            // this.$store.state.dataTarget.customers.forEach(item => {
-            //     if(item.name === value){
-            //         this.targetlist.push(...item.quotas);
-            //     }
-            // });
             this.selectedQuota="不限";
             this.selectedPubState="不限";
             this.$refs.addimei.clear();
         },
         stepCanceled: function(){
+            console.log("stepCanceled");
             this.curStep=0;
             //this.stepData={};
         },
@@ -519,7 +514,6 @@ export default {
             this.curStep++;
             this.$refs.checkimei.input(commit);
             this.$refs.checkimei.startChecking();
-           // this.stepData=commit;
         },
         checkImeiCommit: function(commit){
             console.log("checkImeiCommit:" + JSON.stringify(commit));
@@ -531,8 +525,6 @@ export default {
             this.curStep=0;
             if(ok === true){
                 this.$refs.addimei.clear();
-                //this.$refs.checkimei.clear();
-                //this.$refs.commitimei.clear();
             }
             console.log("commitImeiDone ok="+ok);
         },
@@ -540,6 +532,7 @@ export default {
             this.loadingCustomer = true;
             this.errorMsg1='';
             this.selectedUserID='';
+            this.custkey='';
             this.$http.get(URL_DATATARGET_GET_CUSTOMERS).then((response) => {
                     //console.log("response ok="+JSON.stringify(response.body));
                     var cus = [];
@@ -568,14 +561,147 @@ export default {
                     });
         },
         onlineCheckAll: function(){
-
+            this.data.origin.forEach(item => {
+                if(item.online === 1){
+                    console.log("["+item.id+"]"+item.imei+" already online");
+                }else{
+                    this.onlineCheck(item.id);
+                }
+            });
         },
-
         onlineCheck: function(id){
-            console.log("onlineCheck:" + id);
+            //console.log("onlineCheck:" + id);
+            var imei = this.data.origin[id].imei;
+            console.log("onlineCheck:"+URL_DATATARGET_IMEI_ONLINE+",id:" + id+",imei:"+imei);
+            this.$http.get(URL_DATATARGET_IMEI_ONLINE,{params:{imei:imei,custkey:this.custkey}}).then((response) => { 
+                console.log("response ok="+JSON.stringify(response.body));
+                
+                    var count = response.body.count;
+                    if(count > 0){
+                        this.data.origin[id].online = 1;
+                        //this.writeImeiOnline(imei)
+                    }else{
+                        this.data.origin[id].online = 2;
+                    }    
+            },(response) => {
+                console.log("err:response="+JSON.stringify(response));
+                this.data.origin[id].online = 0;
+            });
+        },
+        // writeImeiOnline:function(imei){
+        //     this.$http.post(URL_DATATARGET_IMEI_ONLINE,{imei:imei,custkey:this.custkey}).then((response) => {
+        //         console.log("response("+URL_DATATARGET_IMEI_ONLINE+")="+response.status);
+        //     },(response) => {
+        //         console.log("err:response="+JSON.stringify(response));
+        //     });
+        // },
+        writeImeiPubed:function(imei, pubtime,custkey){
+            console.log("writeImeiPubed("+imei+","+pubtime+")");
+            this.$http.post(URL_DATATARGET_IMEI_PUBED,{imeis:[imei],custkey:custkey,pubtime:pubtime}).then((response) => {
+                console.log("response("+URL_DATATARGET_IMEI_ONLINE+")="+response.status);
+            },(response) => {
+                console.log("err:response="+JSON.stringify(response));
+            });
         },
         pubOne: function(id){
-            console.log("pubOne:" + id);
+            var pubdata = {
+                items:[
+                    {
+                        imei:this.data.origin[id].imei,
+                        quota:this.data.origin[id].quota,
+                    }
+                ],
+                pubtime:this.taskTime.replace('-',''),
+                mode:"nosms_rapid",
+                custkey:this.custkey
+            }
+            
+            this.$Modal.confirm({
+                footerHide:true,
+                render: (h) => {
+                        return h('pubone-confirm', {
+                            props: {
+                                data: pubdata,
+                            },
+                            on: {
+                                changed: (value1) => {  
+                                    pubdata.mode = value1;
+                                }
+                            }
+                        })
+                    },
+                loading: true,
+                onOk: () => {
+                this.$http.post(VURL_DATATARGET_PUB,pubdata).then((response) => {
+                    console.log("response ok="+JSON.stringify(response.body));
+                    if(response.body.state === '200000'){
+                        this.data.origin[id].pub = 1;
+                        this.info.tobepub --;
+                        this.info.pubed ++;
+                        this.data.tobepub --;
+                        this.data.filteredtobepub --;
+                        this.writeImeiPubed(pubdata.items[0].imei,pubdata.pubtime,pubdata.custkey);
+                        this.$Message.success("已发布!");
+                    }else{
+                        console.log("onlineCheck:state="+response.body.state);
+                        this.$Message.error("发布失败(state:"+response.body.state+")");
+                    }
+                    this.$Modal.remove();
+                },(response) => {
+                    console.log("err:response="+JSON.stringify(response));
+                    this.$Message.error("发布失败,网络错误(code:"+response.status+")");
+                    this.$Modal.remove();
+                });
+                }
+            });
+        },
+        pubBatched:function(){
+            var pubdata = {
+                all:false,
+                items:[],
+                pubtime:this.taskTime,
+                mode:"nosms_rapid",
+                custkey:this.custkey,
+                total:this.info.tobepub,
+            }
+            if(this.selectedPubRange === '全部'){
+                pubdata.all = true;
+                pubdata.total = this.info.tobepub;
+            }else if(this.selectedPubRange === '当前筛选项'){
+                pubdata.total = 0;
+                this.data.filterdata.forEach(it => {
+                    if(it.pub > 0){
+
+                    }else{
+                        var itp = {imei:it.imei, quota:it.quota};
+                        pubdata.items.push(itp);
+                        pubdata.total ++;
+                    } 
+                });
+            }else{
+                pubdata.total = 0;
+                this.data.origin.forEach(it => {
+                    if(it.pub > 0){
+
+                    }else{
+                        var itp = {imei:it.imei, quota:it.quota};
+                        pubdata.items.push(itp);
+                        pubdata.total ++;
+                    } 
+                });
+            }
+            if(pubdata.total > 0){
+                this.pubbatchedModal = true;
+                this.$refs.pubbatched.input(pubdata);
+            }else{
+                this.$Message.error("无有效数据")
+            }
+        },
+        pubBatchResult(reload){
+            if(reload === true){
+                //this.filterImeis(true);
+                this.filterImeis(false);
+            }
         }
    },
    mounted(){

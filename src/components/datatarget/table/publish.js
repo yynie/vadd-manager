@@ -88,9 +88,9 @@ export const columns = (vm) => {
             vm.tablefilterRemote(checked, key, column);
         },
         render: (h, params) => {
-            const color = params.row.online===3?'':(params.row.online===1?'green':'red');
-            const text = params.row.online===3?'未知':(params.row.online===1?'已上线':'未上线');
-            const icon = params.row.online===3?'help':(params.row.online===1?'checkmark':'close');
+            const color = params.row.online===0?'':(params.row.online===1?'green':'red');
+            const text = params.row.online===0?'未知':(params.row.online===1?'已上线':'未上线');
+            const icon = params.row.online===0?'help':(params.row.online===1?'checkmark':'close');
             return h('div', [
                 h('Icon', {
                     props: {
@@ -115,8 +115,8 @@ export const columns = (vm) => {
         width: 180+addwidth,
         render: (h, params) => {
             var txt = '发布'+vm.taskTime+'任务';
-            var disabledpub = params.row.status;
-            var disabledSearch = params.row.online !== 0;
+            var disabledpub = (params.row.pub > 0);
+            var disabledSearch = (params.row.online === 1);
             return h('div', [
                     h('Tooltip', {
                         props: {
@@ -137,7 +137,7 @@ export const columns = (vm) => {
                             },
                             on: {
                                 click: () => {
-                                    vm.onlineCheck(params.row.imei);
+                                    vm.onlineCheck(params.row.id);
                                 }
                             },
                         },[h('Icon',{props:{type:'search',size:'18'}})])
@@ -166,7 +166,7 @@ export const columns = (vm) => {
                             },
                             on: {
                                 click: () => {
-                                    vm.pubOne(params.row.imei);
+                                    vm.pubOne(params.row.id);
                                 }
                             },
                         },[h('Icon',{props:{type:'paper-airplane',size:'16'}})])

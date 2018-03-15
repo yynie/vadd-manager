@@ -122,7 +122,7 @@ export default {
             this.commitingData=false;
         },
         close:function(){
-            this.$emit('on-cancel');
+            //this.$emit('on-cancel');
             this.modal.close();
         },
         setStartTime:function(date){

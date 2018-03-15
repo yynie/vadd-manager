@@ -41,11 +41,25 @@ var poolmnger = mysql.createPool({
 });  
 
 //测试接口 未使用
-app.get(base+'login', function (req, res) {
-    console.log("get login");
-    var create = moment().format('YYYY-MM-DD h:mm:ss'); 
-    res.jsonp({test:create});
+app.get(base+'test', function (req, res) {
+    //console.log("get online?imei="+req.query.imei);
+   // var create = moment().format('YYYY-MM-DD h:mm:ss'); 
+    
+    
+    
+ //   
 })
+
+app.post(base+'pub', function (req, res) {
+   // console.log("post pub body=" +JSON.stringify(req.body));
+    //res.status(404).end();
+   
+        res.json({state:'200000'});
+
+    
+ //   
+})
+//测试接口 未使用
 
 //vcp登陆
 app.post(base+'login', function (req, res) {
@@ -171,7 +185,7 @@ app.get(base+'datatarget/imeis/statistics', function(req, res){
 app.get(base+'datatarget/imeis', function(req, res){
     console.log("get datatarget/imeis?query=" + JSON.stringify(req.query));
     var custkey = req.query.custkey;
-    var taskTime = req.query.taskTime;
+    var tasktime = req.query.tasktime;
     var pubstate = parseInt(req.query.pubstate);
     var quota = parseInt(req.query.quota);
     var page = parseInt(req.query.page);
@@ -183,9 +197,9 @@ app.get(base+'datatarget/imeis', function(req, res){
         pagesize = 10;
     }
     
-    var pubtime = taskTime.replace('-','');
+    var pubtime = tasktime.replace('-','');
 
-    var sql = 'SELECT count(1) as total FROM t_imei_pub WHERE custkey=\''+custkey+'\' AND start<=\''+taskTime+'\' AND end>=\''+taskTime+'\'';
+    var sql = 'SELECT count(1) as total FROM t_imei_pub WHERE custkey=\''+custkey+'\' AND start<=\''+tasktime+'\' AND end>=\''+tasktime+'\'';
     if(pubstate === 1){
         sql += ' AND locate(\''+pubtime+'\',pubdate)>0';
     }else if(pubstate === 2){
@@ -212,7 +226,7 @@ app.get(base+'datatarget/imeis', function(req, res){
                         data:Array
                     }
                     //console.log(final);
-                    sql = sql.replace('count(1) as total','imei,createtime,start,end,quota,locate(\''+pubtime+'\',pubdate) as pub');
+                    sql = sql.replace('count(1) as total','imei,createtime,start,end,quota,online,locate(\''+pubtime+'\',pubdate) as pub');
                     var offset = (page - 1) * pagesize;
                     sql += ' ORDER BY start asc LIMIT ' + offset + "," + pagesize;
                    // console.log(sql);
@@ -232,7 +246,7 @@ app.get(base+'datatarget/imeis', function(req, res){
     });
 })
 
-//曾经imei
+//增加imei
 app.post(base+'datatarget/imeis', function (req, res) {
     console.log("post datatarget/imeis body:"+JSON.stringify(req.body));
     var data = req.body;
@@ -279,6 +293,104 @@ app.post(base+'datatarget/imeis', function (req, res) {
         }
     });
  }
+
+ //查询是否已上线 ali从库
+ app.get(base+'datatarget/imei/online', function (req, res) {
+    console.log("get datatarget/imei/online?imei="+req.query.imei+"&custkey="+req.query.custkey);
+    var sql = 'SELECT count(1) as count FROM t_pnterminal WHERE imei=\'' + req.query.imei +'\'';
+    
+    poolrdonly.getConnection(function(err,conn){  
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();   
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    var count = results[0].count;
+                    console.log(JSON.stringify(results[0])+"count="+count);
+                    if(count > 0){
+                        writeOnline(req.query.imei,req.query.custkey,res,count);
+                    }else{
+                        res.json({count:count});
+                    }
+                }
+            });
+        }
+    });
+ })
+
+ writeOnline=function(imei,custkey,res,count){
+    var sql = 'UPDATE t_imei_pub SET online=\'1\' WHERE imei=\'' + imei + '\' AND custkey=\''+custkey+'\'';
+    console.log("writeOnline:"+sql);
+    poolmnger.getConnection(function(err,conn){
+         if(err){
+             res.status(500).json({error:err});
+         }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.json({count:count});
+                }
+            });
+         }
+     });
+ }
+
+ //修改为online
+// app.post(base+'datatarget/imei/online', function (req, res) {
+//     console.log("post datatarget/imei/online body:"+JSON.stringify(req.body));
+//     var imei = req.body.imei;
+//     var custkey = req.body.custkey;
+//     var sql = 'UPDATE t_imei_pub SET online=\'1\' WHERE imei=\'' + imei + '\' AND custkey=\''+custkey+'\'';
+//     poolmnger.getConnection(function(err,conn){
+//          if(err){
+//              res.status(500).json({error:err});
+//          }else{
+//             conn.query(sql,function(err,results,fields){ 
+//                 conn.release();
+//                 if(err){
+//                     res.status(500).json({error:err});
+//                 }else{
+//                     res.status(200).end();
+//                 }
+//             });
+//          }
+//      });
+// })
+//修改发布状态
+app.post(base+'datatarget/imei/pubed', function (req, res) {
+    //console.log("post datatarget/imei/pubed body:"+JSON.stringify(req.body));
+    var imeis = req.body.imeis;
+    var custkey = req.body.custkey;
+    var pubtime = req.body.pubtime;
+    console.log("post datatarget/imei/pubed imeis len:"+imeis.length);
+    var sql = 'UPDATE t_imei_pub SET pubdate=CONCAT(pubdate,\''+pubtime+',\') WHERE custkey=\''+custkey+'\' AND imei in (';
+    imeis.forEach(element => {
+        sql += '\''+element+'\','
+    });
+    sql = sql.replace(/(,*$)/g,""); //去尾部,
+    sql +=')';
+   // console.log(sql);
+    poolmnger.getConnection(function(err,conn){
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.status(200).end();
+                }
+            });
+        }
+    });
+    
+})
 
 var server = app.listen(3000, function () {
  

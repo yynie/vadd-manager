@@ -14,6 +14,7 @@ import './const'
 import fullScreen from './components/common/fullscreen.vue';
 import messageTip from './components/common/messagetip.vue';
 import breadcrumbNav from './components/common/breadcrumbnav.vue'
+import puboneConfirm from './components/datatarget/puboneConfirmModal.vue'
 
 Vue.config.productionTip = false
 Vue.use(iView);
@@ -22,6 +23,7 @@ Vue.use(VueResource);
 Vue.component('full-screen', fullScreen);
 Vue.component('message-tip', messageTip);
 Vue.component('breadcrumb-nav', breadcrumbNav);
+Vue.component('pubone-confirm', puboneConfirm);
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
