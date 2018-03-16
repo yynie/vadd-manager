@@ -6,9 +6,13 @@ global.URL_DATATARGET_ADD_QUOTA = global.SERVER + "datatarget/quota";
 global.URL_DATATARGET_CHECK_CONFLICT = global.SERVER + "datatarget/conflict";
 global.URL_DATATARGET_IMEIS = global.SERVER + "datatarget/imeis";
 global.URL_DATATARGET_IMEIS_STATISTICS = global.SERVER + "datatarget/imeis/statistics";
-global.URL_DATATARGET_IMEI_ONLINE = global.SERVER + "datatarget/imei/online"
-global.URL_DATATARGET_IMEI_PUBED = global.SERVER + "datatarget/imei/pubed"
+global.URL_DATATARGET_IMEI_ONLINE = global.SERVER + "datatarget/imei/online";
+global.URL_DATATARGET_IMEI_PUBED = global.SERVER + "datatarget/imei/pubed";
+global.URL_DATATARGET_CUSTOMERS_CHECK = global.SERVER + "datatarget/customer/count";
+global.URL_DATATARGET_DEL_CUSTOMER = global.SERVER + "datatarget/customer/delete";
 
+
+/** vadd server */
 global.VADDSERVER = "http://www.alphanbiot.com:10088/vaddservice/";
 global.VURL_DATATARGET_PUB = global.VADDSERVER + "pub";
 

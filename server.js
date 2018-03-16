@@ -86,10 +86,10 @@ app.post(base+'login', function (req, res) {
     
 })
 
-//查询流量任务用户
-app.get(base+'datatarget/customers', function (req, res) {
-    console.log("get datatarget/customers");
-    var sql = 'SELECT apikey,name,disp,quotas FROM t_customer';
+//查询流量用户名是否存在
+app.get(base+'datatarget/customer/count', function (req, res) {
+    console.log("get datatarget/customer/count?name=" + req.query.name);
+    var sql = 'SELECT count(1) as count FROM t_customer WHERE name=\''+req.query.name+'\'';
     poolmnger.getConnection(function(err,conn){
         if(err){
             res.status(500).json({error:err});
@@ -100,6 +100,80 @@ app.get(base+'datatarget/customers', function (req, res) {
                     res.status(500).json({error:err});
                 }else{
                     res.json(results);
+                }
+            });
+        }
+    });
+})
+
+//查询流量任务用户
+app.get(base+'datatarget/customers', function (req, res) {
+    console.log("get datatarget/customers");
+    var sql = 'SELECT id,apikey,name,disp,quotas FROM t_customer ORDER BY name asc';
+    poolmnger.getConnection(function(err,conn){
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();   
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.json(results);
+                }
+            });
+        }
+    });
+})
+
+//新增或修改用户
+app.post(base+'datatarget/customers', function (req, res) {
+    var commit = req.body;
+    console.log("pos datatarget/customers body:"+JSON.stringify(commit));
+    var sql = '';
+    if(commit.id.length === 0){
+        //new
+        var uuid = nodeUuid.v1().replace(/-/g,''); 
+        sql = 'INSERT INTO t_customer(`id`,`apikey`, `name`, `disp`, `quotas`) VALUES(\'' +
+            uuid + '\',\'' + commit.apikey + '\',\'' + commit.name + '\',\'' + commit.disp + '\',\'' + JSON.stringify(commit.quotas) +
+            '\')';
+    }else{
+        //update
+        sql = 'UPDATE t_customer SET disp=\'' + commit.disp + '\',quotas=\'' + JSON.stringify(commit.quotas) + '\' WHERE id=\'' + commit.id + '\'';
+    }
+    console.log(sql);
+    poolmnger.getConnection(function(err,conn){
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();   
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.status(200).end();
+                }
+            });
+        }
+    });
+})
+
+//删除用户
+app.post(base+'datatarget/customer/delete', function (req, res) {
+    var delid = req.body.id;
+    console.log("pos datatarget/customers delid:"+delid);
+    var sql = 'DELETE FROM t_customer WHERE id=\''+ delid + '\'';
+    console.log(sql);
+    poolmnger.getConnection(function(err,conn){
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();   
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.status(200).end();
                 }
             });
         }

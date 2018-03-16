@@ -48,7 +48,6 @@
                     </template>
                     <MenuItem name="dtquery">查询</MenuItem>
                     <MenuItem name="dttask">发布</MenuItem>
-                    <MenuItem name="2-3">导入imei</MenuItem>
                 </Submenu>
                 <Submenu name="3">
                     <template slot="title">
@@ -58,7 +57,7 @@
                     <MenuItem name="3-1">VCP 账户</MenuItem>
                     <MenuItem name="3-2">奖励池</MenuItem>
                     <MenuItem name="3-3">项目配置</MenuItem>
-                    <MenuItem name="3-4">流量任务客户</MenuItem>
+                    <MenuItem name="dtcustomer">流量任务客户</MenuItem>
                 </Submenu>
             </Menu>
         </Sider>

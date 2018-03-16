@@ -44,7 +44,7 @@
                     </Row>
                     <Row style="marginTop:20px">
                         <p v-if="imeierror !== ''" style="color:#f00">{{imeierror}}</p>
-                        <p v-else>多个号码用 , 分隔</p>
+                        <p v-else>多个号码用英文 , 号分隔</p>
                         <Input v-model="imeis" type="textarea" :rows="10" placeholder="Enter imei..."></Input>
                         <Button style="marginTop:20px" type="primary" size="large" :loading="commitingData" @click="commitData">
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;提&nbsp;&nbsp;&nbsp;&nbsp;交&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
