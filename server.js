@@ -254,6 +254,39 @@ app.get(base+'datatarget/imeis/statistics', function(req, res){
         }
     });
 })
+//查询一个imei
+app.get(base+'datatarget/sigleimei', function(req, res){
+    console.log("get datatarget/sigleimei?query=" + JSON.stringify(req.query));
+    var custkey = req.query.custkey;
+    var tasktime = req.query.tasktime;
+    var pubstate = parseInt(req.query.pubstate);
+    var imei = req.query.imei;
+    
+    var pubtime = tasktime.replace('-','');
+
+    var sql = 'SELECT imei,createtime,start,end,quota,online,locate(\''+pubtime+'\',pubdate) as pub FROM t_imei_pub'+
+    ' WHERE custkey=\''+custkey+'\' AND start<=\''+tasktime+'\' AND end>=\''+tasktime+'\' AND imei=\''+imei+'\'';
+    if(pubstate === 1){
+        sql += ' AND locate(\''+pubtime+'\',pubdate)>0';
+    }else if(pubstate === 2){
+        sql += ' AND (pubdate is null OR locate(\''+pubtime+'\',pubdate)=0)';
+    }
+    
+    poolmnger.getConnection(function(err,conn){
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.status(200).json(results);
+                }
+            });
+        }
+    });
+})
 
 //查询imei
 app.get(base+'datatarget/imeis', function(req, res){
@@ -263,6 +296,7 @@ app.get(base+'datatarget/imeis', function(req, res){
     var pubstate = parseInt(req.query.pubstate);
     var quota = parseInt(req.query.quota);
     var page = parseInt(req.query.page);
+    
     if((page === undefined) || (page < 1)){
         page = 1;
     }
@@ -465,6 +499,48 @@ app.post(base+'datatarget/imei/pubed', function (req, res) {
     });
     
 })
+
+//根据custkey查询已发布的任务
+app.post(base+'datatarget/tasks', function (req, res) {
+    console.log("get datatarget/tasks:"+JSON.stringify(req.body));
+    var tasktime = req.body.tasktime;
+    var status = req.body.status;
+    var imeis = req.body.imeis;
+    
+    var sql = 'SELECT imei,state,mode,mtotal as total,mrest as rest,durationtotal as duration,dlastuploadspeed as speed,stateupdatetime as statetime,updatetime FROM t_datatarget' +
+        ' WHERE batchno=\''+tasktime+'\'';
+    if(status === 'off'){
+        sql += ' AND state=0';
+    }else if(status === 'working'){
+        sql += ' AND state=5';
+    }else if(status === 'error'){
+        sql += ' AND state=900';
+    }else if(status === 'done'){
+        sql += ' AND state=200';
+    }
+    sql += ' AND imei in(';
+    imeis.forEach((imei) => {
+        sql += '\'' + imei +'\',';
+    })
+    sql = sql.replace(/(,*$)/g,""); //去尾部,
+    sql += ')';
+    poolrdonly.getConnection(function(err,conn){
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.status(200).json(results);
+                }
+            });
+        }
+    });
+    
+})
+
 
 var server = app.listen(3000, function () {
  

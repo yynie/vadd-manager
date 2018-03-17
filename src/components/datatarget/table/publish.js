@@ -221,3 +221,127 @@ export const checkcolumns = (vm) => {
         }
     ]
 };
+
+export const dtqueryColumns = () => {
+    return [
+        {key: 'imei', title: 'IMEI'},
+        {key: 'state', title: '状态',
+        render: (h, params) => {
+            var color = ''
+            var text = 'state:'+params.row.state;
+            var icon = 'help';
+            if(params.row.state==='900'){
+                color = 'red';
+                text = '失败';
+                icon = 'close';
+            }else if(params.row.state==='200'){
+                color = 'green';
+                text = '完成';
+                icon = 'checkmark';
+            }else if(params.row.state==='5'){
+                color = '#ff7700';
+                text = '执行中';
+                icon = 'flash';
+            }else if(params.row.state==='0'){
+                color = '';
+                text = '未开始';
+                icon = 'ios-circle-outline';
+            }else if(params.row.state===''){
+                color = '#aaa';
+                text = '???';
+                icon = 'help';
+            }
+
+            return h('div', [
+                h('Icon', {
+                    props: {
+                        type: icon,
+                        size: '14',
+                        color: color
+                    }
+                }),
+                h('span', {
+                    style: {
+                        fontSize:'13px',
+                        marginLeft:'10px',
+                        color: color
+                    }
+                },text)
+            ]);
+        }
+        },
+        {key: 'mode', title: '模式',
+            render: (h, params) => {
+                const text = params.row.mode === ''?'???':params.row.mode;
+                const color = params.row.mode === ''?'#aaa':'';
+                return h('span', {
+                    style: {
+                        fontSize:'13px',
+                        color: color
+                    }
+                },text)
+            },
+        },
+        {key: 'total', title: '总量(M)',sortable:true},
+        {key: 'rest', title: '剩余(M)',
+            render: (h, params) => {
+                const text = params.row.rest === ''?'???':params.row.rest;
+                const color = params.row.rest === ''?'#aaa':'';
+                return h('span', {
+                    style: {
+                        fontSize:'13px',
+                        color: color
+                    }
+                },text)
+            },
+        },
+        {key: 'duration', title: '耗时(秒)',sortable: true,
+            render: (h, params) => {
+                const text = params.row.duration === ''?'???':params.row.duration;
+                const color = params.row.duration === ''?'#aaa':'';
+                return h('span', {
+                    style: {
+                        fontSize:'13px',
+                        color: color
+                    }
+                },text)
+            },
+        },
+        {key: 'speed', title: '估算速度(B/秒)',sortable: true,
+            render: (h, params) => {
+                const text = params.row.speed === ''?'???':params.row.speed;
+                const color = params.row.speed === ''?'#aaa':'';
+                return h('span', {
+                    style: {
+                        fontSize:'13px',
+                        color: color
+                    }
+                },text)
+            },
+        },
+        {key: 'statetime', title: '状态更新时间',sortable: true,
+            render: (h, params) => {
+                const text = params.row.statetime === ''?'???':params.row.statetime;
+                const color = params.row.statetime === ''?'#aaa':'';
+                return h('span', {
+                    style: {
+                        fontSize:'13px',
+                        color: color
+                    }
+                },text)
+            },
+        },
+        {key: 'updatetime', title: '最后更新时间',sortable: true,
+            render: (h, params) => {
+                const text = params.row.updatetime === ''?'???':params.row.updatetime;
+                const color = params.row.updatetime === ''?'#aaa':'';
+                return h('span', {
+                    style: {
+                        fontSize:'13px',
+                        color: color
+                    }
+                },text)
+            },
+        },
+    ]
+}
