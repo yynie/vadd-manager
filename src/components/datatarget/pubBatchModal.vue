@@ -234,7 +234,7 @@ export default {
             console.log("pubOne:"+JSON.stringify(pubdata));
             this.$http.post(VURL_DATATARGET_PUB,pubdata).then((response) => {
                     console.log("response ok="+JSON.stringify(response.body));
-                    if(response.body.state === '200000'){
+                    if(response.body.state === 200000){
                         setTimeout(function(){
                             var imeis = [];
                             pubdata.items.forEach(el => {

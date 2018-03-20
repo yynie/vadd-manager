@@ -634,7 +634,7 @@ export default {
                 onOk: () => {
                 this.$http.post(VURL_DATATARGET_PUB,pubdata).then((response) => {
                     console.log("response ok="+JSON.stringify(response.body));
-                    if(response.body.state === '200000'){
+                    if(response.body.state === 200000){
                         this.data.origin[id].pub = 1;
                         this.info.tobepub --;
                         this.info.pubed ++;

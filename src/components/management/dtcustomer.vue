@@ -23,6 +23,7 @@
     </div>
 </template>
 <script>
+import {DtCustColumns} from './table/table';
 export default {
     data () {
         return {
@@ -30,46 +31,12 @@ export default {
                 loading:false,
                 items:[]
             },
-            columns:[
-                 { key: 'name', title: '名称'},
-                 { key: 'disp', title: '描述'},
-                 { key: 'apikey', title: 'KEY'},
-                 { key: 'quotas', title: '流量指标(M)'},
-                 { key: 'options',title: '操作',
-                    render: (h, params) => {
-                        return h('div', [
-                            h('Button', {
-                                props: {
-                                    type: "ghost",
-                                    size: 'small'
-                                },
-                                style: {
-                                    margin:'0 8px'
-                                },
-                                on: {
-                                    click: () => {
-                                    this.onEdit(params.row.index);
-                                }
-                            }
-                            }, '编辑'),
-                            h('Button', {
-                                props: {
-                                    type: "error",
-                                    size: 'small'
-                                },
-                                on: {
-                                    click: () => {
-                                    this.onDelete(params.row.index);
-                                }
-                            }
-                            }, '删除')
-                        ]);
-                    }
-                 }
-            ]
         }
     },
     computed:{
+        columns(){
+            return DtCustColumns(this);
+        },
         tableData(){
             return this.data.items;
         },
@@ -83,6 +50,7 @@ export default {
         },
         onDelete:function(index){
             var delid = this.data.items[index].id;
+            var name = this.data.items[index].name;
             this.$Modal.confirm({
                 render: (h) => {
                     return h('div',{
@@ -100,7 +68,7 @@ export default {
                         {
                             style:{margin:'40px 0',color:'#f00',fontSize:'14px'}
                         },
-                        '确认删除用户 '+ this.data.items[index].name + " ?")
+                        '确认删除用户 '+ name + " ?")
                         ]
                     )
                 },
@@ -136,12 +104,12 @@ export default {
                             props: {
                                 data: data
                             },
-                            on: {
-                                changed: (key,value) => {  
-                                    data[key] = value;
-                                  //  console.log("dd changed:"+JSON.stringify(data));
-                                }
-                            }
+                            // on: {
+                            //     changed: (key,value) => {  
+                            //         data[key] = value;
+                            //       //  console.log("dd changed:"+JSON.stringify(data));
+                            //     }
+                            // }
                         })
                     },
                 loading: true,

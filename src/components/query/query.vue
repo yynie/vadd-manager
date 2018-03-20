@@ -31,7 +31,7 @@ export default {
             if(this.textcalc === ''){
                 return '';
             }else{
-                return this.textcalc.MD5(32);
+                return this.textcalc.MD5(32).toUpperCase();
             }
         }
     },

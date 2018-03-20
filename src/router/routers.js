@@ -12,6 +12,7 @@ export const homeRouter = {
         { path: 'dtquery', meta:{title: '查询', group:'dtarget', groupname:'流量消耗'}, name: 'dtquery', component: () => import('@/components/datatarget/dtquery.vue') },
         { path: 'dttask', meta:{title: '发布', group:'dtarget', groupname:'流量消耗'}, name: 'dttask', component: () => import('@/components/datatarget/dttask.vue')},
         //管理
+        { path: 'vcpaccount',meta:{title: 'VCP 账户', group:'management', groupname:'管理'}, name: 'vcpaccount', component: () => import('@/components/management/vcpaccount.vue')},
         { path: 'dtcustomer',meta:{title: '流量任务客户', group:'management', groupname:'管理'}, name: 'dtcustomer', component: () => import('@/components/management/dtcustomer.vue')},
     ]
 };

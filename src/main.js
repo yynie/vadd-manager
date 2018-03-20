@@ -16,6 +16,10 @@ import messageTip from './components/common/messagetip.vue';
 import breadcrumbNav from './components/common/breadcrumbnav.vue'
 import puboneConfirm from './components/datatarget/puboneConfirmModal.vue'
 import dtcustomerEdit from './components/management/dtcustomerModal.vue'
+import SelectableTag from './components/common/SelectableTag.vue'
+import NewVcpEditor from './components/management/NewVcpEditor.vue'
+import AddCustSubjectEditor from './components/management/AddCustSubjectEditor.vue'
+
 Vue.config.productionTip = false
 Vue.use(iView);
 Vue.use(VueResource);
@@ -25,6 +29,9 @@ Vue.component('message-tip', messageTip);
 Vue.component('breadcrumb-nav', breadcrumbNav);
 Vue.component('pubone-confirm', puboneConfirm);
 Vue.component('dtcustomer_edit', dtcustomerEdit);
+Vue.component('seletable-tag',SelectableTag);
+Vue.component('newvcp_edit', NewVcpEditor);
+Vue.component('addcustsub_edit', AddCustSubjectEditor)
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

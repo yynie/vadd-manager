@@ -44,21 +44,18 @@ var poolmnger = mysql.createPool({
 app.get(base+'test', function (req, res) {
     //console.log("get online?imei="+req.query.imei);
    // var create = moment().format('YYYY-MM-DD h:mm:ss'); 
-    
-    
-    
+
  //   
 })
 
-app.post(base+'pub', function (req, res) {
-   // console.log("post pub body=" +JSON.stringify(req.body));
+app.post(base+'vcpcust', function (req, res) {
+    console.log("post vcp/vcpcust body=" +JSON.stringify(req.body));
     //res.status(404).end();
    
-        res.json({state:'200000'});
-
-    
+        res.json({state:200000});  
  //   
 })
+
 //测试接口 未使用
 
 //vcp登陆
@@ -447,28 +444,6 @@ app.post(base+'datatarget/imeis', function (req, res) {
          }
      });
  }
-
- //修改为online
-// app.post(base+'datatarget/imei/online', function (req, res) {
-//     console.log("post datatarget/imei/online body:"+JSON.stringify(req.body));
-//     var imei = req.body.imei;
-//     var custkey = req.body.custkey;
-//     var sql = 'UPDATE t_imei_pub SET online=\'1\' WHERE imei=\'' + imei + '\' AND custkey=\''+custkey+'\'';
-//     poolmnger.getConnection(function(err,conn){
-//          if(err){
-//              res.status(500).json({error:err});
-//          }else{
-//             conn.query(sql,function(err,results,fields){ 
-//                 conn.release();
-//                 if(err){
-//                     res.status(500).json({error:err});
-//                 }else{
-//                     res.status(200).end();
-//                 }
-//             });
-//          }
-//      });
-// })
 //修改发布状态
 app.post(base+'datatarget/imei/pubed', function (req, res) {
     //console.log("post datatarget/imei/pubed body:"+JSON.stringify(req.body));
@@ -540,6 +515,110 @@ app.post(base+'datatarget/tasks', function (req, res) {
     });
     
 })
+
+//查所有VCP account
+app.get(base+'vcp/accounts', function (req, res) {
+    console.log("get vcp/accounts");
+    var sql = 'SELECT * FROM t_account ORDER BY accname ASC';
+    
+    poolrdonly.getConnection(function(err,conn){  
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();   
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.json(results);
+                }
+            });
+        }
+    });
+ })
+
+//查一个VCP account 
+ app.get(base+'vcp/account', function (req, res) {
+    console.log("get vcp/account?apikey="+req.query.apikey);
+    var sql = 'SELECT * FROM t_account WHERE apikey=\''+req.query.apikey+'\'';
+    
+    poolrdonly.getConnection(function(err,conn){  
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();   
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.json(results);
+                }
+            });
+        }
+    });
+ })
+ 
+ //VCP subject关联
+app.get(base+'vcp/subcust', function (req, res) {
+    console.log("get vcp/subcust?apikey="+req.query.apikey);
+    var sql = 'SELECT * FROM t_cust_sub WHERE apikey=\''+req.query.apikey+'\' ORDER BY subid ASC';
+    
+    poolrdonly.getConnection(function(err,conn){  
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();   
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.json(results);
+                }
+            });
+        }
+    });
+ })
+
+ //VCP 检查用户名是否重复
+ app.get(base+'vcp/name/check', function(req, res) {
+    console.log("get vcp/name/check?name="+req.query.name);
+    var sql = 'SELECT count(1) as count FROM t_account WHERE accname=\''+req.query.name+'\'';
+    poolrdonly.getConnection(function(err,conn){  
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();   
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.json(results);
+                }
+            });
+        }
+    });
+ })
+
+ app.get(base+'subjectcust', function(req, res) {
+    console.log("get subjectcust?subid="+req.query.subid+"&vcpkey="+req.query.vcpkey);
+    var sql = 'SELECT sub.id,sub.subname,sub.requiredver,SUM(IF(cust.apikey=\''+req.query.vcpkey+'\',1,0)) exist FROM t_subject AS sub'
+    +' LEFT JOIN t_cust_sub AS cust ON sub.id=cust.subid WHERE sub.id=\''+req.query.subid+'\'';
+
+    poolrdonly.getConnection(function(err,conn){  
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();   
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.json(results);
+                }
+            });
+        }
+    });
+ })
 
 
 var server = app.listen(3000, function () {
