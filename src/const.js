@@ -17,6 +17,7 @@ global.URL_VCP_ACCOUNT = global.SERVER + "vcp/account";
 global.URL_VCP_SUB_CUST = global.SERVER + "vcp/subcust";
 global.URL_VCP_NAME_CHECK = global.SERVER + "vcp/name/check";
 global.URL_SUBJECT_CUST = global.SERVER + "subjectcust";
+global.URL_SUBJECT = global.SERVER + "subject";
 
 /** vadd server */
 global.VADDSERVER = "http://www.alphanbiot.com:10088/vaddservice/";

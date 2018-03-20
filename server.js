@@ -620,6 +620,26 @@ app.get(base+'vcp/subcust', function (req, res) {
     });
  })
 
+ app.get(base+'subject', function(req,res){
+    var sql = 'SELECT * FROM t_subject ORDER BY updatetime ASC';
+
+    poolrdonly.getConnection(function(err,conn){  
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();   
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.json(results);
+                }
+            });
+        }
+    });
+
+ })
+
 
 var server = app.listen(3000, function () {
  

@@ -54,10 +54,10 @@
                         <Icon type="settings"></Icon>
                         <span>管理</span>
                     </template>
-                    <MenuItem name="vcpaccount">VCP 账户</MenuItem>
-                    <MenuItem name="3-2">奖励池</MenuItem>
-                    <MenuItem name="3-3">项目配置</MenuItem>
                     <MenuItem name="dtcustomer">流量任务客户</MenuItem>
+                    <MenuItem name="vcpaccount">VCP 账户</MenuItem>
+                    <MenuItem name="subject">Vadd项目</MenuItem>
+                    <MenuItem name="bonuspool">奖励池</MenuItem>
                 </Submenu>
             </Menu>
         </Sider>
