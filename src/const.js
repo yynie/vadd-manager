@@ -1,5 +1,5 @@
 /* query urls */
-global.SERVER = "http://127.0.0.1:3000/mnger/";
+global.SERVER = "http://192.168.20.53:7070/mnger/";
 global.URL_LOGIN = global.SERVER + "login";
 global.URL_DATATARGET_GET_CUSTOMERS = global.SERVER + "datatarget/customers";
 global.URL_DATATARGET_ADD_QUOTA = global.SERVER + "datatarget/quota";

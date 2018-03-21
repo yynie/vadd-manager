@@ -40,23 +40,7 @@ var poolmnger = mysql.createPool({
     port: '3306'
 });  
 
-//测试接口 未使用
-app.get(base+'test', function (req, res) {
-    //console.log("get online?imei="+req.query.imei);
-   // var create = moment().format('YYYY-MM-DD h:mm:ss'); 
 
- //   
-})
-
-app.post(base+'vcpcust', function (req, res) {
-    console.log("post vcp/vcpcust body=" +JSON.stringify(req.body));
-    //res.status(404).end();
-   
-        res.json({state:200000});  
- //   
-})
-
-//测试接口 未使用
 
 //vcp登陆
 app.post(base+'login', function (req, res) {

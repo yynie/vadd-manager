@@ -160,10 +160,22 @@ export default {
             var importdata = null;
             var fileReader = new FileReader();
             let $me = this;
+            var rAAB = false;
+            if (!FileReader.prototype.readAsBinaryString) {
+                rAAB = true; //IE 的FileReader不支持readAsBinaryString
+            }
+            console.log("rAAB="+rAAB);
             fileReader.onload = function(ev) {
                 try {
                     var data = ev.target.result;
-                    const workbook = XLSX.read(data, {type: 'binary'});
+                    var workbook;
+                    if(rAAB) {
+                        var arry = $me.fixdata(data);
+                        workbook = XLSX.read(btoa(arry), {type: 'base64'});
+                    }else{
+                        workbook = XLSX.read(data, {type: 'binary'});
+                    }
+
                     if(workbook.SheetNames.length > 0){
                         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                         var json = XLSX.utils.sheet_to_json(worksheet);
@@ -216,8 +228,17 @@ export default {
                     return;
                 }
             }
-
-            fileReader.readAsBinaryString(file);
+            if(rAAB === true){
+                fileReader.readAsArrayBuffer(file);
+            }else{
+                fileReader.readAsBinaryString(file);
+            }
+        },
+        fixdata:function(data) {
+            var o = "", l = 0, w = 10240;
+            for (; l < data.byteLength / w; ++l) o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w, l * w + w)));
+            o += String.fromCharCode.apply(null, new Uint8Array(data.slice(l * w)));
+            return o;
         },
         fillExxxData:function(data){
             this.selectedQuota = '';

@@ -53,6 +53,7 @@
                     <Button style="marginTop:0px" type="primary" size="large" :disabled="!canCommit" :loading="commitingData" @click="commitData">
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;提&nbsp;&nbsp;&nbsp;&nbsp;交&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     </Button>
+                    <span style="marginLeft:20px;color:#ff9900">&gt;&gt; 待提交IMEI共&nbsp;&nbsp;<b>{{mydata.imeiarr.length}}</b>&nbsp;&nbsp;个 &lt;&lt;</span>
                 </Row>
             </div>
         </div>
@@ -121,7 +122,7 @@ export default {
             return table.checkcolumns(this);
         },
         canCommit(){
-            return (this.errorimei.length === 0 && this.status === 1)
+            return (this.errorimei.length === 0 && this.status === 1 && this.mydata.imeiarr.length>0)
         },
         canDeleteAll(){
             return (this.errorimei.length > 0 && this.status === 1)
