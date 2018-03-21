@@ -35,7 +35,7 @@
                 <Submenu name="1">
                     <template slot="title">
                         <Icon type="stats-bars"></Icon>
-                        <span>数据查询</span>
+                        <span>数据</span>
                     </template>
                     <MenuItem name="query">Option 1</MenuItem>
                     <MenuItem name="1-2">Option 2</MenuItem>
