@@ -20,7 +20,7 @@
                 
                 <div style="float:right">
                     <Button style="marginLeft:20px" type="ghost" size='small'><!-- @click="downloadSample" -->
-                        <a href="https://github.com/yynie/some/blob/master/IMEI-%E6%89%B9%E9%87%8F%E5%AF%BC%E5%85%A5%E6%A8%A1%E6%9D%BF.xlsx" 
+                        <a href="https://github.com/yynie/some/raw/master/IMEI-%E6%89%B9%E9%87%8F%E5%AF%BC%E5%85%A5%E6%A8%A1%E6%9D%BF.xlsx" 
                         download="IMEI-批量导入模板.txt">下载Excel模板</a>  
                         </Button>
                 </div>
