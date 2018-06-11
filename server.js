@@ -541,6 +541,48 @@ app.get(base+'vcp/accounts', function (req, res) {
         }
     });
  })
+
+ //查一个VCP account retail
+ app.get(base+'vcp/account/retail', function (req, res) {
+    console.log("get vcp/account/retail?boundkey="+req.query.apikey);
+    var sql = 'SELECT * FROM t_vcp_retail WHERE boundkey=\''+req.query.apikey+'\'';
+
+    poolrdonly.getConnection(function(err,conn){
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();   
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    res.json(results);
+                }
+            });
+        }
+    });
+ });
+
+ //查一个VCP account retail 名称冲突
+ app.get(base+'vcp/account/retail/name/check', function (req, res) {
+    console.log("get vcp/account/retail/name/check?username=" + req.query.name);
+    var sql = 'SELECT count(1) as count FROM t_vcp_retail WHERE username=\''+req.query.name+'\'';
+    poolrdonly.getConnection(function(err,conn){
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();   
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    console.log("vcp/account/retail/name/check count=" + JSON.stringify(results));
+                    res.json(results);
+                }
+            });
+        }
+    });
+})
  
  //VCP subject关联
 app.get(base+'vcp/subcust', function (req, res) {
