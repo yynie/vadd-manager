@@ -58,6 +58,7 @@
                     <MenuItem name="vcpaccount">VCP 账户</MenuItem>
                     <MenuItem name="subject">Vadd项目</MenuItem>
                     <MenuItem name="bonuspool">奖励池</MenuItem>
+                    <MenuItem name="whatforever">从exel中提取数据</MenuItem>
                 </Submenu>
             </Menu>
         </Sider>
@@ -120,7 +121,7 @@ export default {
             });
         },
         handleSignOut: function(){
-            Cookies.delete('user');
+            Cookies.delete('A7FBD15A58DDCA81050C568A7222FE6C');
             this.$store.commit(LOG_OUT);
             this.$router.push({
                 path: '/login'

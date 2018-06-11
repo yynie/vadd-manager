@@ -105,7 +105,7 @@ export default {
         console.log("login user="+user+",passed="+passed);
         if(passed){
             var data = {user:this.form.isAdmin?"Admin":user, admin:this.form.isAdmin};
-            Cookies.set('user', JSON.stringify(data), {expires:COOKIE_EXPIRED,unit:COOKIE_EXPIRED_UNIT});
+            Cookies.set('A7FBD15A58DDCA81050C568A7222FE6C', JSON.stringify(data), {expires:COOKIE_EXPIRED,unit:COOKIE_EXPIRED_UNIT});
             this.$store.commit(LOG_IN, data);
             
             this.$router.replace({

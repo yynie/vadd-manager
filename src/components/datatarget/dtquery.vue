@@ -24,12 +24,12 @@
                         <Option v-for="item in targetlist" :value="item" :key="item">{{ item }}</Option>
                     </Select>
                     </div>
-                    <div class="filter-div" > 
+                    <!-- <div class="filter-div" > 
                     <span style="color:#ff9900;marginRight:4px">状态</span>
                     <Select style="width:160px;" v-model="status">
                         <Option v-for="item in statuslist" :value="item" :key="item">{{ item }}</Option>
                     </Select>
-                    </div>
+                    </div> -->
                     <div class="filter-div-end">
                     <Button style="width:90px;height:34px" @click="loadAll" type="primary" :loading="data.loading">载&nbsp;&nbsp;&nbsp;&nbsp;入</Button>
                     </div>
@@ -218,24 +218,27 @@ export default {
                 status:'none',
                 imeis:imeis
             }
-            if(this.status === '不限'){
-                params.status = 'none';
-            }else if(this.status === '未开始'){
-                params.status = 'off';
-            }else if(this.status === '错误'){
-                params.status = 'error';
-            }else if(this.status === '完成'){
-                params.status = 'done';
-            }else if(this.status === '执行中'){
-                params.status = 'working';
-            }
+            // if(this.status === '不限'){
+            //     params.status = 'none';
+            // }else if(this.status === '未开始'){
+            //     params.status = 'off';
+            // }else if(this.status === '错误'){
+            //     params.status = 'error';
+            // }else if(this.status === '完成'){
+            //     params.status = 'done';
+            // }else if(this.status === '执行中'){
+            //     params.status = 'working';
+            // }
             
             this.$http.post(URL_DATATARGET_GET_DTTASK,params).then((response) => {
                 
                 var array = response.body;
                 var len = array.length;
                 //console.log("response="+JSON.stringify(array)+",len="+len);
-                this.data.origin.forEach((it) => {
+                var copy = [];
+                copy.push(...this.data.origin);
+                this.data.origin.splice(0, this.data.origin.length);
+                copy.forEach((it) => {
                     for(var i=0; i<len; i++){
                         if(it.imei === array[i].imei){
                             it['total'] = array[i].total;
@@ -246,6 +249,7 @@ export default {
                             it['speed'] = array[i].speed.toString();
                             it['statetime'] = moment(array[i].statetime).format('YYYY-MM-DD HH:mm:ss');
                             it['updatetime'] = moment(array[i].updatetime).format('YYYY-MM-DD HH:mm:ss');
+                            this.data.origin.push(it);
                             break;
                         }
                     }

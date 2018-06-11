@@ -268,6 +268,36 @@ export const dtqueryColumns = () => {
                     }
                 },text)
             ]);
+        },
+        filters: [
+            {
+                label: '未开始',
+                value: 2
+            },
+            {
+                label: '失败',
+                value: 3
+            },
+            {
+                label: '完成',
+                value: 4
+            },
+            {
+                label: '执行中',
+                value: 5
+            }
+        ],
+        filterMultiple: false,
+        filterMethod (value, row) {
+            if(value === 2) {
+                return row.state==='0';
+            }else if(value === 3) {
+                return row.state==='900';
+            }else if(value === 4) {
+                return row.state==='200';
+            }else if(value === 5) {
+                return row.state==='5';
+            }
         }
         },
         {key: 'mode', title: '模式',

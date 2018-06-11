@@ -21,12 +21,19 @@
   </div>
 </template>
 <script>
+import moment from 'moment';
 export default {
     data () {
         return {
             data:{
                 loading:false,
                 items:[]
+            },
+            substate:{
+                curindex:0,
+                onoff:1,
+                offexpires:0,
+                subjectExpireCounter:0
             },
             columns:[
                 {key:'id',title:'subid',width:100,fixed:'left'},
@@ -41,7 +48,25 @@ export default {
                 {key:'timeperiodstart',title:'发布时间起始',width:110},
                 {key:'timeperiodend',title:'发布时间截至',width:110},
                 {key:'exprovince',title:'排除省',width:300},
-                
+                {key:'status',title:'状态',width:110,
+                    render: (h, params) => {
+                        return h('div', [
+                            h('Button', {
+                                props: {
+                                type: "primary",
+                                size: 'small'
+                                },
+                                style: {
+                                    margin:'0 10px 0 0'
+                                },
+                                on: {
+                                    click: () => {
+                                        this.checkSubjectStatus(params.row.index);
+                                    }
+                                }
+                            }, '查看禁用')
+                        ])
+                    }}
             ]
         }
     },
@@ -73,6 +98,42 @@ export default {
                 this.data.loading = false;
             });
         },
+        checkSubjectStatus: function(index){
+            this.$http.get(VURL_VCP_SUBJECT_STATUS + "/" + this.data.items[index].id).then((response) => {
+                //console.log("response response="+JSON.stringify(response));
+                var sta = response.body.result;
+                sta.subid = this.data.items[index].id;
+                sta.subname = this.data.items[index].subname === '' ? sta.subid : this.data.items[index].subname;
+                //console.log("response sta="+JSON.stringify(sta));
+                this.showSubjectStatus(sta);
+                
+            },(response) => {
+                console.log("err:response="+JSON.stringify(response));
+                this.errorMsg1="获取项目状态失败";
+                this.$Message.error(this.errorMsg1);
+                this.data.loading = false;
+            });
+        },
+        showSubjectStatus: function(sta){
+            var name = sta.subname;
+            if(sta.onoff === 1) {
+                var success = '可用，超时任务 ' + sta.subjectExpireCounter + ' 个';
+                this.$Modal.success({
+                    title: name,
+                    content: success,
+                })
+            }else {
+                var closed = '在 ' + this.calSubjectCloseTime(sta.offexpires) + ' 已被禁用！';
+                this.$Modal.warning({
+                    title: name,
+                    content:closed,
+                })
+            }
+        },
+        calSubjectCloseTime: function(expired){
+            var today = moment();
+            return today.subtract(7*24*60*60, 'seconds').add(expired, 'seconds').format('YYYY-MM-DD HH:mm');
+        }
     },
     mounted(){
         this.load();

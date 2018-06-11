@@ -25,7 +25,7 @@ router.beforeEach((to, from, next) => {
   Util.title(to.meta.title);
   console.log("from:"+from.name+",to:" + to.name);
   
-  var user = Cookies.get('user');
+  var user = Cookies.get('A7FBD15A58DDCA81050C568A7222FE6C');
   //console.log("cookie user:"+user);
   if (!user){
     if (store.state.user !== ''){

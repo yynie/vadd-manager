@@ -66,6 +66,13 @@ export const VcpColumns = (vm) => {
     ]
 }
 
+export const VcpRetailColumes = () => {
+    return [
+        {key:'a',title:'a',width:200},
+        {key:'b',title:'b'},
+    ]
+}
+
 export const SubjectColumns = (vm) => {
     return [
         {key:'subname',title:'名称'},

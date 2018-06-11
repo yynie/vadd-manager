@@ -16,6 +16,7 @@ export const homeRouter = {
         { path: 'dtcustomer',meta:{title: '流量任务客户', group:'management', groupname:'管理'}, name: 'dtcustomer', component: () => import('@/components/management/dtcustomer.vue')},
         { path: 'bonuspool',meta:{title: '奖励池', group:'management', groupname:'管理'}, name: 'bonuspool', component: () => import('@/components/management/bonuspool.vue')},
         { path: 'subject',meta:{title: 'Vadd项目', group:'management', groupname:'管理'}, name: 'subject', component: () => import('@/components/management/subject.vue')},
+        { path: 'whatforever', meta:{title: 'WhatForEver', group:'management', groupname:'管理'}, name:'whatforever', component: () => import('@/components/management/whatforever.vue')},
     ]
 };
 
