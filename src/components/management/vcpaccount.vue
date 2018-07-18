@@ -394,10 +394,10 @@ export default {
                     this.$Modal.remove();
                 }else{
                     var testValue = this.modifyvalue.val;
-                    if(this.modifyvalue.on == false){
-                        commit['testval']=-1;
-                    }
                     var commit = {apikey:vcp.apikey, test:testValue};
+                    if(this.modifyvalue.on == false){
+                        commit['test']=-1;
+                    }
                     this.commitVcpInfo(commit);
                 }
             }

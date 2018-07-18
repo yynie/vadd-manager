@@ -1,6 +1,6 @@
 /* query urls */
-global.SERVER = "http://192.168.20.53:7070/mnger/";
-//global.SERVER = "http://127.0.0.1:3000/mnger/";
+//global.SERVER = "http://192.168.20.53:7070/mnger/";
+global.SERVER = "http://127.0.0.1:3000/mnger/";
 global.URL_LOGIN = global.SERVER + "login";
 global.URL_DATATARGET_GET_CUSTOMERS = global.SERVER + "datatarget/customers";
 global.URL_DATATARGET_ADD_QUOTA = global.SERVER + "datatarget/quota";
@@ -21,10 +21,16 @@ global.URL_VCP_ACCOUNT_RETAIL_NAME_CHECK = global.SERVER + "vcp/account/retail/n
 global.URL_VCP_NAME_CHECK = global.SERVER + "vcp/name/check";
 global.URL_SUBJECT_CUST = global.SERVER + "subjectcust";
 global.URL_SUBJECT = global.SERVER + "subject";
+global.URL_VERIFYTASK_TERMINAL = global.SERVER + "verifytask/terminal";
+global.URL_VERIFYTASK_TERMINAL_STATUS = global.SERVER + "verifytask/terminal/status";
+global.URL_VT_CONSUME_NEXTRATE = global.SERVER + "consume/nextrate";
+
+global.URL_VTF_CHECK_DEVIATION = global.SERVER + "vtf/deviation";
+global.URL_VTF_CHECK_ITEMS = global.SERVER + "vtf/items";
 
 /** vadd server */
 global.VADDSERVER = "http://www.alphanbiot.com:10088/vaddservice/mnger/v1/";
-//global.VADDSERVER = "http://192.168.20.113:10088/vaddservice/mnger/v1/";
+//global.VADDSERVER = "http://192.168.20.53:10088/vaddservice/mnger/v1/";
 global.VURL_DATATARGET_PUB = global.VADDSERVER + "datatarget/pub";
 global.VURL_VCP_ACCOUNT = global.VADDSERVER + "vcp/account";
 global.VURL_VCP_ACCOUNT_CHARGE = global.VADDSERVER + "vcp/account/recharge";

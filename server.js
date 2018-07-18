@@ -666,6 +666,201 @@ app.get(base+'vcp/subcust', function (req, res) {
 
  })
 
+ app.get(base+'verifytask/terminal/status', function(req,res){
+    var page = parseInt(req.query.page);
+    if((page === undefined) || (page < 1)){
+        page = 1;
+    }
+    var pagesize = parseInt(req.query.pagesize);
+    if((pagesize === undefined) || (pagesize < 1)){
+        pagesize = 15;
+    }
+    var final = {
+        total:0,
+        page:page,
+        pagesize:pagesize,
+        data:[]
+    }
+    final.data = req.query.terminals;
+    var phones = '\(';
+    for(var i=0; i<final.data.length; i++){
+        //console.log("ph=" + final.data[i].phonenum);
+        phones += final.data[i].phonenum;
+        if(i < final.data.length - 1){
+            phones += ',';
+        }
+    }
+    phones += '\)';
+
+    var sql = 'SELECT t_pnt.phonenum phonenum, t_pnt.state sta, t_cons.nextrate nextrate, t_sta.totalcount finish_cnt, t_pnt.protocolver prov,'
+        + ' t_pnt.buildid buildid, t_pnt.buildidkey buildidkey, t_cons.createtime createtime, t_pnt.id imsi'
+        + ' FROM t_pnterminal as t_pnt'
+        + ' left join t_vt_consume as t_cons on t_cons.imsi = t_pnt.id'
+        + ' left join t_vt_statistics as t_sta on t_pnt.phonenum = t_sta.phonenum'
+        + ' WHERE t_pnt.phonenum IN ' + phones;
+    poolrdonly.getConnection(function(err,conn){  
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                conn.release();   
+                if(err){
+                    res.status(500).json({error:err});
+                }else{
+                    //console.log("final2:"+JSON.stringify(results));
+                    for(var i=0; i<results.length; i++){
+                        for(var j=0; j<final.data.length; j++){
+                            if(final.data[j].phonenum === results[i].phonenum){
+                                results[i]["failed_cnt"] = final.data[j].failed_cnt;
+                                break;
+                            }
+                        }
+                    }
+                    final.data = results;
+                    res.status(200).json(final);
+                }
+            });
+        }
+    });
+ })
+
+ app.get(base+'verifytask/terminal', function(req,res){
+    var page = parseInt(req.query.page);
+    if((page === undefined) || (page < 1)){
+        page = 1;
+    }
+    var pagesize = parseInt(req.query.pagesize);
+    if((pagesize === undefined) || (pagesize < 1)){
+        pagesize = 15;
+    }
+
+    var phones = '\(';
+    var final = {
+        total:0,
+        page:page,
+        pagesize:pagesize,
+        data:[]
+    }
+    var poolTemp = mysql.createPool({  
+        host: req.query.addr,
+        user: req.query.user,
+        password: req.query.pwd,
+        database: 'vaddservice',
+        port: req.query.port,
+    });
+    var sql = 'SELECT count(1) total FROM '
+    + ' (SELECT vtask.phonenum phonenum, count(1) cnt FROM t_verifytaskfail vtask '
+    + ' where status=\'1\' and vtask.subid=\'' + req.query.subid + '\' '
+    + ' group by phonenum) as tt where tt.cnt>=10 ';
+    poolTemp.getConnection(function(err,conn){
+        if(err){
+            res.status(500).json({error:err});
+        }else{
+            conn.query(sql,function(err,results,fields){ 
+                if(err){
+                    conn.release();
+                    res.status(500).json({error:err});
+                }else{
+                    //console.log(results[0].total);
+                    final.total = results[0]['total'];
+                    final.data = Array;
+                    //console.log(final);
+                    var offset = (page - 1) * pagesize;
+                    var sql2 = 'SELECT tt.phonenum, tt.failed_cnt from '
+                    + ' (SELECT vtask.phonenum, count(1) failed_cnt FROM t_verifytaskfail vtask '
+                    + ' where status=\'1\' and vtask.subid=\'' + req.query.subid + '\' '
+                    + ' group by phonenum) as tt where tt.failed_cnt>=10 '
+                    + ' order by failed_cnt desc '
+                    + ' limit ' + offset + ',' + pagesize;
+                    //console.log(sql);
+                    conn.query(sql2,function(err,results,fields){ 
+                        conn.release();
+                        if(err){
+                            res.status(500).json({error:err});
+                        }else{
+                            final.data=results;
+                            res.status(200).json(final);                            
+                        }
+                    });
+                }
+            });
+        }
+    });
+ })
+
+
+ app.post(base+'vtf/deviation', function(req,res){
+  //console.log(JSON.stringify(req.body))
+  var phonenums = req.body.phonenums;
+  var key = req.query.apikey;
+  var subid = req.query.subid;
+  var date = req.query.date;
+
+  //console.log(phonenums);
+  var sql = 'SELECT phonenum,createtime,updatetime,status,verifysms FROM t_verifytaskfail WHERE status>=103 AND phonenum in (' + phonenums
+  sql = sql.replace(/(,*$)/g,""); //去尾部,
+  sql +=')';
+  if(key !== undefined && key.trim().length > 0){
+    sql += ' AND apikey=\''+key+'\'';
+  }
+  if(subid !== undefined && subid.trim().length > 0){
+    sql += ' AND subid=\''+subid+'\'';
+  }
+
+  sql += ' AND date_format(createtime, \'%Y-%m-%d\')=\''+date + '\'';
+  //console.log(sql)
+
+  poolrdonly.getConnection(function(err,conn){  
+    if(err){
+        res.status(500).json({error:err});
+    }else{
+        conn.query(sql,function(err,results,fields){ 
+            conn.release();   
+            if(err){
+                res.status(500).json({error:err});
+            }else{
+                res.status(200).json(results);
+            }
+        });
+    }
+  });
+ })
+
+
+ app.post(base+'vtf/items', function(req,res){
+  var phones = req.body.phones;
+  var key = req.query.apikey;
+  var subid = req.query.subid;
+  var date = req.query.date;
+
+  var sql = 'SELECT phonenum,createtime,updatetime,status,verifysms FROM t_verifytaskfail WHERE phonenum in (' + phones + ')';
+  if(key !== undefined && key.trim().length > 0){
+    sql += ' AND apikey=\''+key+'\'';
+  }
+  if(subid !== undefined && subid.trim().length > 0){
+    sql += ' AND subid=\''+subid+'\'';
+  }
+
+  sql += ' AND date_format(createtime, \'%Y-%m-%d\')=\''+date + '\'';
+  sql += ' ORDER BY phonenum asc, createtime asc'
+  //console.log(sql)
+
+  poolrdonly.getConnection(function(err,conn){  
+    if(err){
+        res.status(500).json({error:err});
+    }else{
+        conn.query(sql,function(err,results,fields){ 
+            conn.release();   
+            if(err){
+                res.status(500).json({error:err});
+            }else{
+                res.status(200).json(results);
+            }
+        });
+    }
+  });
+ })
+
 
 var server = app.listen(3000, function () {
  

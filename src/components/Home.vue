@@ -59,6 +59,7 @@
                     <MenuItem name="subject">Vadd项目</MenuItem>
                     <MenuItem name="bonuspool">奖励池</MenuItem>
                     <MenuItem name="whatforever">从exel中提取数据</MenuItem>
+                    <MenuItem name="verifytask">打码任务统计</MenuItem>
                 </Submenu>
             </Menu>
         </Sider>
